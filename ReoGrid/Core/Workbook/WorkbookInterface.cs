@@ -6,7 +6,7 @@ using System.Text;
 using unvell.ReoGrid.Events;
 using unvell.ReoGrid.IO;
 
-#if WINFORM || WPF
+#if WINFORM || WPF || AVALONIA
 using ControlType = unvell.ReoGrid.ReoGridControl;
 #elif ANDROID
 using ControlType = unvell.ReoGrid.ReoGridView;
@@ -18,7 +18,7 @@ namespace unvell.ReoGrid
 	/// Represents an interface of workbook instance
 	/// </summary>
 	public interface IWorkbook
-#if WINFORM || WPF
+#if WINFORM || WPF || AVALONIA
 		: IDisposable
 #endif // WINFORM || WPF
 	{

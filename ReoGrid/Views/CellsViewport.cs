@@ -1003,7 +1003,7 @@ namespace unvell.ReoGrid.Views
 						{
 							g.FillRectangle(scaledSelectionRect, selectionFillColor);
 						}
-#elif WPF
+#elif WPF || AVALONIA
 						g.FillRectangle(scaledSelectionRect, selectionFillColor);
 #endif // WPF
 

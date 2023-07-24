@@ -26,9 +26,12 @@ using unvell.ReoGrid.Graphics;
 using System.Windows.Forms;
 using RGFloat = System.Single;
 using RGImage = System.Drawing.Image;
-#else
+#elif WPF
 using RGFloat = System.Double;
 using RGImage = System.Windows.Media.ImageSource;
+#else
+using RGFloat = System.Double;
+using RGImage = Avalonia.Media.ImageDrawing;
 #endif // WINFORM
 
 using unvell.ReoGrid.Rendering;

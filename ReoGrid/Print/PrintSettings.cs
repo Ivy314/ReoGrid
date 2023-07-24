@@ -24,7 +24,7 @@ using System;
 using RGFloat = System.Single;
 using WFPaperSize = System.Drawing.Printing.PaperSize;
 using WFPageSettings = System.Drawing.Printing.PageSettings;
-#elif WPF
+#elif WPF || AVALONIA
 using RGFloat = System.Double;
 #endif // WPF
 

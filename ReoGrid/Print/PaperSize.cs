@@ -29,9 +29,12 @@ using unvell.ReoGrid.Utility;
 #if WINFORM
 using RGFloat = System.Single;
 using RGSizeF = System.Drawing.SizeF;
-#elif WPF
+#elif WPF 
 using RGFloat = System.Double;
 using RGSizeF = System.Windows.Size;
+#elif AVALONIA
+using RGFloat = System.Double;
+using RGSizeF = Avalonia.Size;
 #endif // WPF
 
 namespace unvell.ReoGrid.Print

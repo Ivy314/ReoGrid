@@ -25,9 +25,12 @@ using System.Linq;
 using System.Windows.Forms;
 using RGFloat = System.Single;
 using RGImage = System.Drawing.Image;
-#else
+#elif WPF
 using RGFloat = System.Double;
 using RGImage = System.Windows.Media.ImageSource;
+#elif AVALONIA
+using RGFloat = System.Double;
+using RGImage = Avalonia.Media.ImageDrawing;
 #endif // WINFORM
 
 using unvell.ReoGrid.Rendering;
@@ -119,16 +122,16 @@ namespace unvell.ReoGrid.CellTypes
 						break;
 
 					case ImageCellViewMode.Zoom:
-						RGFloat widthRatio = (RGFloat)Bounds.Width / Image.Width;
-						RGFloat heightRatio = (RGFloat)Bounds.Height / Image.Height;
+						RGFloat widthRatio = (RGFloat)Bounds.Width / Image.Rect.Width;
+						RGFloat heightRatio = (RGFloat)Bounds.Height / Image.Rect.Height;
 						RGFloat minRatio = Math.Min(widthRatio, heightRatio);
-						width = minRatio * Image.Width;
-						height = minRatio * Image.Height;
+						width = minRatio * Image.Rect.Width;
+						height = minRatio * Image.Rect.Height;
 						break;
 
 					case ImageCellViewMode.Clip:
-						width = Image.Width;
-						height = Image.Height;
+						width = Image.Rect.Width;
+						height = Image.Rect.Height;
 
 						if (width > Bounds.Width || height > Bounds.Height) needClip = true;
 						break;

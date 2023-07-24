@@ -17,7 +17,7 @@
  * 
  ****************************************************************************/
 
-#if WINFORM || WPF
+#if WINFORM || WPF || AVALONIA
  
 using System;
 using System.Collections.Generic;
@@ -51,6 +51,16 @@ using RGBrushes = System.Windows.Media.Brushes;
 using RGDashStyle = System.Windows.Media.DashStyle;
 using RGDashStyles = System.Windows.Media.DashStyles;
 
+#elif AVALONIA
+
+using RGFloat = System.Double;
+
+using RGPen = Avalonia.Media.Pen;
+using RGSolidBrush = Avalonia.Media.SolidColorBrush;
+//using RGBrushes = System.Windows.Media.Brushes;
+using RGDashStyle = Avalonia.Media.IDashStyle;
+using RGDashStyles = Avalonia.Media.DashStyle;
+
 #endif // WPF
 
 using unvell.ReoGrid.Graphics;
@@ -68,7 +78,7 @@ namespace unvell.Common
 		}
 
 #region Brush
-#if WINFORM || WPF
+#if WINFORM || WPF || AVALONIA
 		private Dictionary<SolidColor, RGSolidBrush> cachedBrushes = new Dictionary<SolidColor, RGSolidBrush>();
 
 		public RGSolidBrush GetBrush(SolidColor color)
@@ -174,7 +184,7 @@ namespace unvell.Common
 		private Dictionary<SolidColor, List<RGPen>> cachedPens = new Dictionary<SolidColor, List<RGPen>>();
 		public RGPen GetPen(SolidColor color)
 		{
-			return GetPen(color, 1, RGDashStyles.Solid);
+			return GetPen(color, 1, RGDashStyles.Dot);
 		}
 		public RGPen GetPen(SolidColor color, RGFloat weight, RGDashStyle style)
 		{
@@ -190,7 +200,7 @@ namespace unvell.Common
 					penlist = cachedPens[color] = new List<RGPen>();
 #if WINFORM
 					penlist.Add(pen = new RGPen(color, weight));
-#elif WPF
+#elif WPF || AVALONIA
 				penlist.Add(pen = new RGPen(new RGSolidBrush(color), weight));
 #endif // WPF
 
@@ -207,7 +217,7 @@ namespace unvell.Common
 					{
 #if WINFORM
 						pen = penlist.FirstOrDefault(p => p.Width == weight && p.DashStyle == style);
-#elif WPF
+#elif WPF || AVALONIA
 						pen = penlist.FirstOrDefault(p => p.Thickness == weight && p.DashStyle == style);
 #endif // WPF
 					}
@@ -216,7 +226,7 @@ namespace unvell.Common
 					{
 #if WINFORM
 						penlist.Add(pen = new RGPen(color, weight));
-#elif WPF
+#elif WPF || AVALONIA
 					penlist.Add(pen = new RGPen(new RGSolidBrush(color), weight));
 #endif // WPF
 						pen.DashStyle = style;
@@ -241,7 +251,7 @@ namespace unvell.Common
 		public WFFont GetFont(string familyName, float emSize, WFFontStyle wfs)
 		{
 
-#elif WPF
+#elif WPF || AVALONIA
 		public WFFont GetFont(string familyName, double emSizeD, WFFontStyle wfs)
 		{
 			float emSize = (float)emSizeD;
@@ -418,9 +428,55 @@ namespace unvell.Common
 		}
 #endif // WPF
 
-#endregion // Font
+#if AVALONIA
 
-#region Image
+		private Dictionary<string, Avalonia.Media.FontFamily> fontFamilies
+			= new Dictionary<string, Avalonia.Media.FontFamily>();
+
+		public Avalonia.Media.FontFamily GetFontFamily(string name)
+		{
+			Avalonia.Media.FontFamily ff = null;
+			this.fontFamilies.TryGetValue(name, out ff);
+			if (ff == null)
+			{
+				ff = new Avalonia.Media.FontFamily(name);
+				this.fontFamilies[name] = ff;
+			}
+			return ff;
+		}
+
+		private Dictionary<string, List<Avalonia.Media.Typeface>> typefaces 
+			= new Dictionary<string, List<Avalonia.Media.Typeface>>();
+
+		public Avalonia.Media.Typeface GetTypeface(string name)
+		{
+			return GetTypeface(name, Avalonia.Media.FontWeight.Regular, Avalonia.Media.FontStyle.Normal,
+				Avalonia.Media.FontStretch.Normal);
+		}
+
+		public Avalonia.Media.Typeface GetTypeface(string name, Avalonia.Media.FontWeight weight, 
+			Avalonia.Media.FontStyle style, Avalonia.Media.FontStretch stretch)
+		{
+			List<Avalonia.Media.Typeface> list;
+
+			if (!typefaces.TryGetValue(name, out list))
+			{
+				this.typefaces[name] = list = new List<Avalonia.Media.Typeface>();
+			}
+
+			var typeface = list.FirstOrDefault(t=>t.Weight == weight && t.Style == style);
+			if (typeface == null)
+			{
+				list.Add(typeface = new Avalonia.Media.Typeface(new Avalonia.Media.FontFamily(name), style, weight, stretch));
+			}
+
+			return typeface;
+		}
+#endif // AVALONIA
+
+        #endregion // Font
+
+        #region Image
 #if WINFORM && IMAGE_POOL
 		private Dictionary<Guid, ImageResource> images 
 			= new Dictionary<Guid, ImageResource>();
@@ -479,11 +535,11 @@ namespace unvell.Common
 			return res;
 		}
 #endif
-#endregion
+        #endregion
 
-#region Graphics
+        #region Graphics
 
-		private static System.Drawing.Bitmap bitmapForCachedGDIGraphics;
+        private static System.Drawing.Bitmap bitmapForCachedGDIGraphics;
 		private static WFGraphics cachedGDIGraphics;
 		public static WFGraphics CachedGDIGraphics
 		{

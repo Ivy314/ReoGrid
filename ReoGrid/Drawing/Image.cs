@@ -5,14 +5,16 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-
+using Avalonia.Media;
 using unvell.ReoGrid.Graphics;
-using unvell.ReoGrid.Rendering;
+using DrawingContext = unvell.ReoGrid.Rendering.DrawingContext;
 
 #if WINFORM
 using RGImage = System.Drawing.Image;
 #elif WPF
 using RGImage = System.Windows.Media.ImageSource;
+#elif AVALONIA
+using RGImage = Avalonia.Media.DrawingImage;
 #elif ANDROID
 using RGImage = Android.Graphics.Picture;
 #endif // WINFORM
@@ -45,7 +47,7 @@ namespace unvell.ReoGrid.Drawing
 
 			this.Image = image;
 
-			this.Size = new Graphics.Size(image.Width, image.Height);
+			this.Size = new Graphics.Size(image.Size.Width, image.Size.Height);
 		}
 
 		/// <summary>
@@ -64,7 +66,7 @@ namespace unvell.ReoGrid.Drawing
 
 				var clientRect = this.ClientBounds;
 
-				g.DrawImage(this.Image, clientRect);
+				g.DrawImage(this.Image.Drawing as ImageDrawing, clientRect);
 
 				if (!this.LineColor.IsTransparent)
 				{

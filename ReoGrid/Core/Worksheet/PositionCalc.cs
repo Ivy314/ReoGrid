@@ -24,7 +24,7 @@ using System.Text;
 #if WINFORM || ANDROID
 using RGFloat = System.Single;
 
-#elif WPF
+#elif WPF || AVALONIA
 using RGFloat = System.Double;
 
 #elif iOS

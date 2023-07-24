@@ -88,11 +88,25 @@ namespace unvell.ReoGrid.Drawing.Shapes.SmartShapes
 
 				Path.Figures.Add(pf);
 			}
+#elif AVALONIA
+
+			Path.Figures.Clear();
+
+			if (this.SweepAngle > 0)
+			{
+				Avalonia.Media.PathFigure pf = new Avalonia.Media.PathFigure();
+			
+				pf.Segments.Add(new Avalonia.Media.LineSegment(this.OriginPoint, false));
+				pf.Segments.Add(new Avalonia.Media.ArcSegment(new Avalonia.Point(0, 0),
+					new Avalonia.Size(this.Width, this.Height), this.SweepAngle, true, Avalonia.Media.SweepDirection.Clockwise, false));
+
+				Path.Figures.Add(pf);
+			}
 
 #elif ANDROID
 #endif // WINFORM
-		}
-	}
+        }
+    }
 }
 
 #endif // DRAWING

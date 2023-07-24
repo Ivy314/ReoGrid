@@ -25,7 +25,7 @@ using System.Text;
 using System.Xml.Serialization;
 using System.Threading;
 using System.Globalization;
-
+using Avalonia.Media;
 using unvell.Common;
 using unvell.ReoGrid.Events;
 using unvell.ReoGrid.IO;
@@ -705,12 +705,16 @@ namespace unvell.ReoGrid
 									img.CacheOption = System.Windows.Media.Imaging.BitmapCacheOption.OnLoad;
 									img.EndInit();
 									((CellTypes.ImageCell)cell.body).Image = img;
+#elif AVALONIA
+                                        var img = new Avalonia.Media.Imaging.Bitmap(ms);
+                                        ((CellTypes.ImageCell)cell.body).Image = new ImageDrawing{ImageSource = img};
+
 #else // WINFORM
 										var img = System.Drawing.Image.FromStream(ms);
 										((CellTypes.ImageCell)cell.body).Image = img;
 #endif // WINFORM | WPF
 
-									}
+                                    }
 
 									cellValue = null;
 								}
@@ -1405,7 +1409,7 @@ namespace unvell.ReoGrid
 												 catch (NotSupportedException) { }
 												 enc.Save(ms);
 #else // WINFORM
-									imageBody.Image.Save(ms, System.Drawing.Imaging.ImageFormat.Png);
+									imageBody.Image.ImageSource.Save(ms, System.Drawing.Imaging.ImageFormat.Png);
 
 #endif // WINFORM | WPF
 									xmlCell.data = "image/png," + Convert.ToBase64String(ms.ToArray());

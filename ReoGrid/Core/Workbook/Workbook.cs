@@ -35,14 +35,14 @@ using unvell.ReoGrid.Print;
 
 #if WINFORM || ANDROID
 using RGFloat = System.Single;
-#elif WPF
+#elif WPF || AVALONIA
 using RGFloat = System.Double;
 #elif iOS
 using RGFloat = System.Double;
 
 #endif // WPF
 
-#if WINFORM || WPF
+#if WINFORM || WPF || AVALONIA
 using ReoGridControl = unvell.ReoGrid.ReoGridControl;
 #elif ANDROID
 using ReoGridControl = unvell.ReoGrid.ReoGridView;

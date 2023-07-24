@@ -18,7 +18,7 @@
 
 #if PRINT
 
-#if WPF
+#if WPF || AVALONIA
 
 using System;
 using System.Collections.Generic;

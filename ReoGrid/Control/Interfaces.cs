@@ -44,6 +44,16 @@ using RGPoint = System.Windows.Point;
 using RGPointF = System.Windows.Point;
 using RGRect = System.Windows.Rect;
 
+#elif AVALONIA
+using RGFloat = System.Double;
+using RGIntDouble = System.Double;
+
+using IStringFormat = System.Object;
+
+using RGPoint = Avalonia.Point;
+using RGPointF = Avalonia.Point;
+using RGRect = Avalonia.Rect;
+
 #elif ANDROID
 using RGFloat = System.Single;
 using RGIntDouble = System.Int32;
@@ -92,11 +102,16 @@ namespace unvell.ReoGrid.Main
 		System.Windows.Controls.ContextMenu RowHeaderContextMenu { get; }
 		System.Windows.Controls.ContextMenu ColumnHeaderContextMenu { get; }
 		System.Windows.Controls.ContextMenu LeadHeaderContextMenu { get; }
+#elif AVALONIA
+		Avalonia.Controls.ContextMenu CellsContextMenu { get; }
+		Avalonia.Controls.ContextMenu RowHeaderContextMenu { get; }
+		Avalonia.Controls.ContextMenu ColumnHeaderContextMenu { get; }
+		Avalonia.Controls.ContextMenu LeadHeaderContextMenu { get; }
 #endif
-	}
+    }
 
 #if EX_SCRIPT
-	internal interface IScriptExecutableControl
+    internal interface IScriptExecutableControl
 	{
 		string Script { get; set; }
 

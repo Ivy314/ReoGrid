@@ -23,7 +23,7 @@ using System.Diagnostics;
 using RGIntDouble = System.Int32;
 using RGFloat = System.Single;
 
-#elif WPF
+#elif WPF || AVALONIA
 using RGFloat = System.Double;
 using RGIntDouble = System.Double;
 
@@ -642,8 +642,8 @@ namespace unvell.ReoGrid
 			cell.StyleParentKind = StyleParentKind.Own;
 
 			if ((flags & (/*PlainStyleFlag.AlignAll  // may don't need this  |*/
-				PlainStyleFlag.TextWrap |
-#if WINFORM || WPF || iOS
+				PlainStyleFlag.TextWrap  |
+#if WINFORM || WPF || iOS || AVALONIA
 				PlainStyleFlag.FontAll
 #elif ANDROID
 				PlainStyleFlag.FontName | PlainStyleFlag.FontStyleAll

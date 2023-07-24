@@ -37,6 +37,14 @@ using RGPenColor = System.Windows.Media.Brushes;
 using RGDashStyles = System.Windows.Media.DashStyles;
 using RGSolidBrush = System.Windows.Media.SolidColorBrush;
 using PlatformGraphics = System.Windows.Media.DrawingContext;
+#elif AVALONIA
+using RGPointF = Avalonia.Point;
+using RGFloat = System.Double;
+using RGPen = Avalonia.Media.Pen;
+using RGPenColor = Avalonia.Media.Brushes;
+//using RGDashStyles = DashStyles;
+using RGSolidBrush = Avalonia.Media.SolidColorBrush;
+using PlatformGraphics = Avalonia.Media.DrawingContext;
 #elif ANDROID
 using Android.Graphics;
 using PlatformGraphics = Android.Graphics.Canvas;

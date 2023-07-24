@@ -29,6 +29,8 @@ using System.Diagnostics;
 using PlatformGraphics = System.Drawing.Graphics;
 #elif WPF
 using PlatformGraphics = System.Windows.Media.DrawingContext;
+#elif AVALONIA
+using PlatformGraphics = Avalonia.Media.DrawingContext;
 #endif // WPF
 
 using unvell.ReoGrid.Views;

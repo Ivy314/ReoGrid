@@ -22,7 +22,7 @@ using unvell.ReoGrid.Graphics;
 using RGFloat = System.Single;
 using unvell.ReoGrid.Interaction;
 using System;
-#elif WPF
+#elif WPF || AVALONIA
 using RGFloat = System.Double;
 #endif // WPF
 
@@ -35,6 +35,11 @@ using RGFont = System.Drawing.Font;
 using RGPen = System.Windows.Media.Pen;
 using RGBrush = System.Windows.Media.Brush;
 using RGFont = System.Windows.Media.Typeface;
+
+#elif AVALONIA
+using RGPen = Avalonia.Media.Pen;
+using RGBrush = Avalonia.Media.Brush;
+using RGFont = Avalonia.Media.Typeface;
 
 #elif ANDROID
 using RGPen = Android.Graphics.Paint;

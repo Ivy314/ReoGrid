@@ -33,6 +33,12 @@ using RGPoint = System.Windows.Point;
 using RGColor = System.Windows.Media.Color;
 using RGRect = System.Windows.Rect;
 using RGIntDouble = System.Double;
+#elif AVALONIA
+using RGFloat = System.Double;
+using RGPoint = Avalonia.Point;
+using RGColor = Avalonia.Media.Color;
+using RGRect = Avalonia.Rect;
+using RGIntDouble = System.Double;
 #elif ANDROID
 using RGFloat = System.Single;
 using RGPoint = Android.Graphics.Point;

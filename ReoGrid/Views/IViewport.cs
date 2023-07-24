@@ -24,7 +24,7 @@ using System.Diagnostics;
 using RGFloat = System.Single;
 using RGIntDouble = System.Int32;
 
-#elif WPF
+#elif WPF  || AVALONIA
 using RGFloat = System.Double;
 using RGIntDouble = System.Double;
 

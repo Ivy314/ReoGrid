@@ -25,9 +25,12 @@ using System.Linq;
 using System.Windows.Forms;
 using RGFloat = System.Single;
 using RGImage = System.Drawing.Image;
-#else
+#elif WPF
 using RGFloat = System.Double;
 using RGImage = System.Windows.Media.ImageSource;
+#elif AVALONIA
+using RGFloat = System.Double;
+using RGImage = Avalonia.Media.ImageDrawing;
 #endif // WINFORM
 
 using unvell.ReoGrid.Graphics;
@@ -73,12 +76,12 @@ namespace unvell.ReoGrid.CellTypes
 
 			if (this.Image != null)
 			{
-				RGFloat widthScale = Math.Min((Bounds.Width - 4) / this.Image.Width, 1);
-				RGFloat heightScale = Math.Min((Bounds.Height - 4) / this.Image.Height, 1);
+				RGFloat widthScale = Math.Min((Bounds.Width - 4) / this.Image.Rect.Width, 1);
+				RGFloat heightScale = Math.Min((Bounds.Height - 4) / this.Image.Rect.Height, 1);
 
 				RGFloat minScale = Math.Min(widthScale, heightScale);
-				RGFloat imageScale = (RGFloat)Image.Height / Image.Width;
-				RGFloat width = Image.Width * minScale;
+				RGFloat imageScale = (RGFloat)Image.Rect.Height / Image.Rect.Width;
+				RGFloat width = Image.Rect.Width * minScale;
 
 				Rectangle r = new Rectangle(0, 0, width, imageScale * width);
 

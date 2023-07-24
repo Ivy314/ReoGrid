@@ -26,7 +26,7 @@ using System.Linq;
 #if WINFORM
 using RGFloat = System.Single;
 
-#elif WPF
+#elif WPF || AVALONIA
 using RGFloat = System.Double;
 
 #endif // WPF

@@ -6,7 +6,7 @@ using unvell.ReoGrid.Rendering;
 
 #if WINFORM || ANDROID
 using RGFloat = System.Single;
-#elif WPF
+#elif WPF || AVALONIA
 using RGFloat = System.Double;
 #elif iOS
 using RGFloat = System.Double;

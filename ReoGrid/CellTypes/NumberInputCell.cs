@@ -25,9 +25,12 @@ using System.Linq;
 using System.Windows.Forms;
 using RGFloat = System.Single;
 using RGImage = System.Drawing.Image;
-#else
+#elif WPF
 using RGFloat = System.Double;
 using RGImage = System.Windows.Media.ImageSource;
+#elif AVALONIA
+using RGFloat = System.Double;
+using RGImage = Avalonia.Media.ImageDrawing;
 #endif // WINFORM
 
 using unvell.Common;

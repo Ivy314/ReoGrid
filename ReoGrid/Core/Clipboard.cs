@@ -19,7 +19,6 @@
 using System;
 using System.Linq;
 using System.Text;
-
 using unvell.ReoGrid.Events;
 using unvell.ReoGrid.Actions;
 using unvell.ReoGrid.Main;
@@ -31,6 +30,10 @@ using Clipboard = System.Windows.Forms.Clipboard;
 #elif WPF
 using DataObject = System.Windows.DataObject;
 using Clipboard = System.Windows.Clipboard;
+#elif AVALONIA
+using Avalonia.Input;
+using DataObject = Avalonia.Input.DataObject;
+using Clipboard = Avalonia.Input.Platform.IClipboard;
 #endif // WINFORM
 
 #if EX_SCRIPT

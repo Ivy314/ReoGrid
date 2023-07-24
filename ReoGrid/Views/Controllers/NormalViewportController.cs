@@ -28,7 +28,7 @@ using System.Diagnostics;
 #if WINFORM || ANDROID
 using RGFloat = System.Single;
 using RGIntDouble = System.Int32;
-#elif WPF || iOS
+#elif WPF || iOS || AVALONIA
 using RGFloat = System.Double;
 using RGIntDouble = System.Double;
 #endif

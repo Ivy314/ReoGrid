@@ -31,6 +31,10 @@ using WFRect = System.Drawing.Rectangle;
 using RGPen = System.Windows.Media.Pen;
 using RGBrushes = System.Windows.Media.Brushes;
 using PlatformGraphics = System.Windows.Media.DrawingContext;
+#elif AVALONIA
+using RGPen = Avalonia.Media.Pen;
+using RGBrushes = Avalonia.Media.Brushes;
+using PlatformGraphics = Avalonia.Media.DrawingContext;
 #elif ANDROID
 using PlatformGraphics = Android.Graphics.Canvas;
 using RGPen = Android.Graphics.Paint;
@@ -43,7 +47,7 @@ using RGPen = CoreGraphics.CGContext;
 
 #if WINFORM || ANDROID
 using RGFloat = System.Single;
-#elif WPF
+#elif WPF || AVALONIA
 using RGFloat = System.Double;
 #elif iOS
 using RGFloat = System.Double;
@@ -139,6 +143,8 @@ namespace unvell.Common
 			var p = System.Drawing.Pens.Black;
 #elif WPF
 			var p = new System.Windows.Media.Pen(RGBrushes.Black, 1);
+#elif AVALONIA
+			var p = new Avalonia.Media.Pen(RGBrushes.Black, 1);
 #elif ANDROID
 			var p = new RGPen();
 			p.Color = Android.Graphics.Color.Black;
@@ -146,7 +152,7 @@ namespace unvell.Common
 			var p = g;
 #endif // WPF
 
-			FillTriangle(g, size, loc, dir, p);
+            FillTriangle(g, size, loc, dir, p);
 		}
 
 		public static void FillTriangle(PlatformGraphics g, RGFloat size, Point loc, TriangleDirection dir, RGPen p)

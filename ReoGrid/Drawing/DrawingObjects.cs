@@ -23,7 +23,7 @@ using System.Collections.Generic;
 
 #if WINFORM || ANDROID
 using RGFloat = System.Single;
-#elif WPF
+#elif WPF || AVALONIA
 using RGFloat = System.Double;
 #endif // WINFORM
 

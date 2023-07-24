@@ -18,7 +18,7 @@
 
 #if DRAWING
 
-#if (WINFORM || WPF)
+#if (WINFORM || WPF || AVALONIA)
 
 using System;
 using System.Collections.Generic;
@@ -35,6 +35,11 @@ using RGFloat = System.Double;
 using RGFont = System.Windows.Media.Typeface;
 using RGPen = System.Windows.Media.Pen;
 using RGBrush = System.Windows.Media.SolidColorBrush;
+#elif AVALONIA
+using RGFloat = System.Double;
+using RGFont = Avalonia.Media.Typeface;
+using RGPen = Avalonia.Media.Pen;
+using RGBrush = Avalonia.Media.SolidColorBrush;
 #endif // WINFORM
 
 using unvell.Common;
@@ -75,12 +80,12 @@ namespace unvell.ReoGrid.Drawing
 			this.suspendUpdateText = false;
 		}
 
-		#region Constants
+        #region Constants
 		internal const string BuiltInDefaultFontName = "Calibri";
 		internal const RGFloat BuiltInDefaultFontSize = 10.25f;
-		#endregion // Constants
+        #endregion // Constants
 
-		#region Size
+        #region Size
 		private Size size;
 
 		/// <summary>
@@ -102,9 +107,9 @@ namespace unvell.ReoGrid.Drawing
 				}
 			}
 		}
-		#endregion // Size
+        #endregion // Size
 
-		#region Measured Size
+        #region Measured Size
 		internal Size measuredSize = new Size(0, 0);
 
 		/// <summary>
@@ -121,9 +126,9 @@ namespace unvell.ReoGrid.Drawing
 				//return lastLine == null ? new Size(0, 0) : new Size(this.textMaxWidth, lastLine.Bottom);
 			}
 		}
-		#endregion // Measured Text Size
+        #endregion // Measured Text Size
 
-		#region Default Values
+        #region Default Values
 		public string DefaultFontName { get; set; }
 
 		public RGFloat DefaultFontSize { get; set; }
@@ -151,7 +156,7 @@ namespace unvell.ReoGrid.Drawing
 		/// </summary>
 		public ReoGridHorAlign DefaultHorizontalAlignment { get; set; }
 
-		#endregion // Default Values
+        #endregion // Default Values
 
 		/// <summary>
 		/// Determines whether or not allow text displayed out of specified size.
@@ -195,7 +200,7 @@ namespace unvell.ReoGrid.Drawing
 		/// </summary>
 		internal float RotationAngle { get; set; }
 
-		#region Constructors
+        #region Constructors
 
 		/// <summary>
 		/// Create an instance of rich format text.
@@ -233,9 +238,9 @@ namespace unvell.ReoGrid.Drawing
 			this.size = size;
 		}
 
-		#endregion // Constructors
+        #endregion // Constructors
 
-		#region Lines & Paragraphs
+        #region Lines & Paragraphs
 		private List<Paragraph> paragraphs = new List<Paragraph>();
 
 		internal IEnumerable<Paragraph> Paragraphcs { get { return this.paragraphs; } }
@@ -250,9 +255,9 @@ namespace unvell.ReoGrid.Drawing
 			if (p == null) p = new Paragraph(this);
 			this.paragraphs.Add(p);
 		}
-		#endregion // Lines & Paragraphs
+        #endregion // Lines & Paragraphs
 
-		#region Add Text
+        #region Add Text
 		/// <summary>
 		/// Add text at end of current paragraph with specified styles.
 		/// </summary>
@@ -377,9 +382,9 @@ namespace unvell.ReoGrid.Drawing
 			return lastPara;
 		}
 
-		#endregion // Add Text
+        #endregion // Add Text
 
-		#region Draw
+        #region Draw
 		/// <summary>
 		/// Draw rich text at specified area.
 		/// </summary>
@@ -464,7 +469,7 @@ namespace unvell.ReoGrid.Drawing
 						{
 #if WINFORM
 							using (var underlinePen = new RGPen(lastBrush.Color))
-#elif WPF
+#elif WPF || AVALONIA
 							var underlinePen = new RGPen(new RGBrush(lastBrush.Color), 1);
 #endif // WPF
 							{
@@ -498,9 +503,9 @@ namespace unvell.ReoGrid.Drawing
 				g.PopClip();
 			}
 		}
-		#endregion // Draw
+        #endregion // Draw
 
-		#region Update
+        #region Update
 
 #if DEBUG
 		public long lastUpdateMS;
@@ -556,9 +561,9 @@ namespace unvell.ReoGrid.Drawing
 		}
 
 		private string textBuffer = string.Empty;
-		#endregion // Update
+        #endregion // Update
 
-		#region ToString
+        #region ToString
 		internal bool sbDirty = true;
 
 		private StringBuilder sb = null;
@@ -608,19 +613,19 @@ namespace unvell.ReoGrid.Drawing
 		{
 			return this.ToString();
 		}
-		#endregion // ToString
+        #endregion // ToString
 	}
 }
 
 namespace unvell.ReoGrid.Drawing.Text
 {
-	#region Paragraph
+    #region Paragraph
 	/// <summary>
 	/// Repersents a paragraph that is a part of rich format text.
 	/// </summary>
 	internal class Paragraph
 	{
-		#region Attributes
+        #region Attributes
 		private RichText rt;
 
 		private List<Run> runs = new List<Run>();
@@ -631,9 +636,9 @@ namespace unvell.ReoGrid.Drawing.Text
 
 		public RGFloat ParagraphEndSpacing { get; set; }
 
-		#endregion // Attributes
+        #endregion // Attributes
 
-		#region Alignments
+        #region Alignments
 		/// <summary>
 		/// Get or set the horizontal alignment for this paragraph.
 		/// </summary>
@@ -643,16 +648,16 @@ namespace unvell.ReoGrid.Drawing.Text
 		/// Get or set the vertical alignment for this paragraph.
 		/// </summary>
 		public ReoGridVerAlign VerticalAlign { get; set; }
-		#endregion // Alignments
+        #endregion // Alignments
 
-		#region Line Height
+        #region Line Height
 		/// <summary>
 		/// Get or set the line height scale of this paragraph.
 		/// </summary>
 		public RGFloat LineHeight { get; set; }
-		#endregion // Line Height
+        #endregion // Line Height
 
-		#region Constructors
+        #region Constructors
 		/// <summary>
 		/// Create new paragraph with initiali text.
 		/// </summary>
@@ -669,9 +674,9 @@ namespace unvell.ReoGrid.Drawing.Text
 				this.AddText(text);
 			}
 		}
-		#endregion // Constructors
+        #endregion // Constructors
 
-		#region Add Text
+        #region Add Text
 		/// <summary>
 		/// Append text at end of line in current paragraph.
 		/// </summary>
@@ -724,9 +729,9 @@ namespace unvell.ReoGrid.Drawing.Text
 
 			return newRun;
 		}
-		#endregion // Add Text
+        #endregion // Add Text
 
-		#region Update
+        #region Update
 		internal List<Line> lines = new List<Line>();
 
 		internal void UpdateText(RelayoutSession rs)
@@ -768,7 +773,7 @@ namespace unvell.ReoGrid.Drawing.Text
 
 #if WINFORM || ANDROID
 							var b = new Box(r, c.ToString(), curFontInfo, r.TextSizes[i], r.FontInfo.LineHeight);
-#elif WPF
+#elif WPF || AVALONIA
 							var b = new Box(r, c.ToString(), curFontInfo, r.GlyphIndexes[i], r.TextSizes[i]);
 #endif // WPF
 
@@ -881,7 +886,7 @@ namespace unvell.ReoGrid.Drawing.Text
 		{
 			var angle = this.rt.RotationAngle;
 
-			#region Last Line Spacing
+            #region Last Line Spacing
 			// if there is last line, plus the line spacing height
 			if (lastLine != null)
 			{
@@ -903,11 +908,11 @@ namespace unvell.ReoGrid.Drawing.Text
 					}
 				}
 			}
-			#endregion // Last Line Spacing
+            #endregion // Last Line Spacing
 
 			this.lines.Add(line);
 
-			#region Horizontal Relayout Boxes
+            #region Horizontal Relayout Boxes
 			var lineWidth = line.Width;
 
 			RGFloat horAlignOffset = 0;
@@ -962,7 +967,7 @@ namespace unvell.ReoGrid.Drawing.Text
 
 				b.leftTop.X += horAlignOffset;
 			}
-			#endregion // Horizontal Relayout Boxes
+            #endregion // Horizontal Relayout Boxes
 
 			var lineHeight = line.Height;
 
@@ -994,7 +999,7 @@ namespace unvell.ReoGrid.Drawing.Text
 			lastLine = line;
 		}
 
-		#endregion // Update
+        #endregion // Update
 	}
 
 	class RelayoutSession
@@ -1023,7 +1028,7 @@ namespace unvell.ReoGrid.Drawing.Text
 
 		public float d, s, c;
 
-		#region Cached Boxes
+        #region Cached Boxes
 		public List<Box> cacheBoxes = new List<Box>();
 
 		public RGFloat cacheBoxesWidth;
@@ -1049,23 +1054,23 @@ namespace unvell.ReoGrid.Drawing.Text
 			this.cacheBoxesWidth = 0;
 			this.cacheBoxesMaxHeight = 0;
 		}
-		#endregion // Cached Boxes
+        #endregion // Cached Boxes
 	}
-	#endregion // Paragraph
+    #endregion // Paragraph
 
-	#region Run
+    #region Run
 	internal class Run
 	{
 		private RichText rt;
 
 #if WINFORM || ANDROID
 		internal List<RGFloat> TextSizes { get; private set; }
-#elif WPF
+#elif WPF || AVALONIA
 		internal List<double> TextSizes { get; private set; }
 		internal List<ushort> GlyphIndexes { get; private set; }
 #endif // WPF
 
-		#region Font Info
+        #region Font Info
 		private BoxFontInfo fontInfo = null;
 
 		internal BoxFontInfo FontInfo
@@ -1124,7 +1129,7 @@ namespace unvell.ReoGrid.Drawing.Text
 				return this.fontInfo;
 			}
 		}
-		#endregion // Font Info
+        #endregion // Font Info
 
 		private string fontName;
 		public string FontName { get { return this.fontName; } set { this.fontName = value; this.fontInfo = null; } }
@@ -1158,7 +1163,7 @@ namespace unvell.ReoGrid.Drawing.Text
 #endif // WPF
 		}
 
-		#region Text
+        #region Text
 		private string text;
 		public string Text
 		{
@@ -1234,7 +1239,7 @@ namespace unvell.ReoGrid.Drawing.Text
 
 #endif // WINFORM
 		}
-		#endregion // Text
+        #endregion // Text
 
 		//internal RunTypes SpanType { get; set; }
 	}
@@ -1247,9 +1252,9 @@ namespace unvell.ReoGrid.Drawing.Text
 
 		Fraction,
 	}
-	#endregion // Run
+    #endregion // Run
 
-	#region Line & Box
+    #region Line & Box
 	internal class Line
 	{
 		internal RGFloat Height { get; set; }
@@ -1334,7 +1339,7 @@ namespace unvell.ReoGrid.Drawing.Text
 			this.Width = width;
 			this.Height = height;
 		}
-#elif WPF
+#elif WPF || AVALONIA
 
 		internal ushort GlyphIndex { get; private set; }
 
@@ -1352,9 +1357,9 @@ namespace unvell.ReoGrid.Drawing.Text
 			return string.Format("Box[\"{0}\"]", this.Str);
 		}
 	}
-	#endregion // Line & Box
+    #endregion // Line & Box
 
-	#region CJKHelper
+    #region CJKHelper
 	class CJKHelper
 	{
 		private static readonly string left_Symbols = "$（(「【[〔『＜《≪〈<［{｛";
@@ -1461,7 +1466,7 @@ namespace unvell.ReoGrid.Drawing.Text
 			return true;
 		}
 	}
-	#endregion // CJKHelper
+    #endregion // CJKHelper
 }
 
 #endif // (WINFORM || WPF)

@@ -11,7 +11,7 @@ using unvell.ReoGrid.Script;
 
 #if WINFORM || ANDROID
 using RGFloat = System.Single;
-#elif WPF
+#elif WPF || AVALONIA
 using RGFloat = System.Double;
 #elif iOS
 using RGFloat = System.Double;
@@ -247,7 +247,7 @@ namespace unvell.ReoGrid
 
 #if WINFORM
 			if (width < cell.TextBounds.Width) width = cell.TextBounds.Width;
-#elif WPF
+#elif WPF || AVALONIA
 			// why + 6 ?
 			if (width < cell.TextBounds.Width) width = cell.TextBounds.Width + 6;
 #endif

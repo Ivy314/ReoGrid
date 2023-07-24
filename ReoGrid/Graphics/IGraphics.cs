@@ -52,6 +52,19 @@ using RGBrush = System.Windows.Media.Brush;
 using PlatformGraphics = System.Windows.Media.DrawingContext;
 using RGTransform = System.Windows.Media.Matrix;
 
+#elif AVALONIA
+
+using RGFloat = System.Double;
+
+using RGPath = Avalonia.Media.Geometry;
+using RGImage = Avalonia.Media.ImageDrawing;
+
+using RGPen = Avalonia.Media.Pen;
+using RGBrush = Avalonia.Media.Brush;
+
+using PlatformGraphics = Avalonia.Media.DrawingContext;
+using RGTransform = Avalonia.Matrix;
+
 #elif iOS
 using RGFloat = System.Double;
 using PlatformGraphics = CoreGraphics.CGContext;

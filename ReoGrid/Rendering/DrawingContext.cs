@@ -21,7 +21,7 @@ using unvell.ReoGrid.Graphics;
 
 #if WINFORM || ANDROID
 using RGFloat = System.Single;
-#elif WPF || iOS
+#elif WPF || iOS || AVALONIA
 using RGFloat = System.Double;
 #endif
 
