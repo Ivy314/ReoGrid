@@ -21,7 +21,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Text;
-
+using Avalonia.Controls;
 using unvell.Common;
 
 using unvell.ReoGrid.Actions;
@@ -87,6 +87,11 @@ namespace unvell.ReoGrid
 #endif // ANDROID || iOS
     {
         private IRenderer renderer;
+
+        internal IRenderer Renderer
+        {
+            get { return renderer; }
+        }
 
         #region Initialize
 
@@ -1309,7 +1314,7 @@ namespace unvell.ReoGrid
 #elif WPF
             sheetTab.Background = new System.Windows.Media.SolidColorBrush(this.controlStyle[ControlAppearanceColors.SheetTabBackground]);
 #elif AVALONIA
-            sheetTab.Background = new Avalonia.Media.SolidColorBrush(this.controlStyle[ControlAppearanceColors.SheetTabBackground]);
+            ((Grid)sheetTab.Child).Background = new Avalonia.Media.SolidColorBrush(this.controlStyle[ControlAppearanceColors.SheetTabBackground]);
 #endif // WINFORM & WPF
 
             this.adapter?.Invalidate();

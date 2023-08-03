@@ -22,15 +22,14 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.Input;
+using Avalonia.Interactivity;
 using Avalonia.Layout;
 using Avalonia.Media;
+using Avalonia.Media.Immutable;
+using Avalonia.Rendering.Composition;
 using Avalonia.Threading;
 using System;
 using System.Diagnostics;
-using Avalonia.Interactivity;
-using Avalonia.Rendering.Composition;
-using unvell.Common;
-using unvell.ReoGrid.Drawing;
 using unvell.ReoGrid.Graphics;
 using unvell.ReoGrid.Interaction;
 using unvell.ReoGrid.Main;
@@ -39,23 +38,14 @@ using unvell.ReoGrid.Views;
 using unvell.ReoGrid.WPF;
 using HorizontalAlignment = Avalonia.Layout.HorizontalAlignment;
 using Point = unvell.ReoGrid.Graphics.Point;
-using WPFPoint = Avalonia.Point;
 
 namespace unvell.ReoGrid
 {
 
-    class ReoGridControlVisualHandler : CompositionCustomVisualHandler
-    {
-        public ReoGridControl TheControl { get; set; }
-        public override void OnRender(ImmediateDrawingContext drawingContext)
-        {
-        }
-    }
-
-    /// <summary>
+        /// <summary>
         /// ReoGrid Spreadsheet Control
         /// </summary>
-        public partial class ReoGridControl : Canvas, IVisualWorkbook,
+        public partial class ReoGridControl : Decorator, IVisualWorkbook,
         IRangePickableControl, IContextMenuControl, IPersistenceWorkbook, IActionControl, IWorkbook
     {
         internal const int ScrollBarSize = 18;
@@ -108,14 +98,16 @@ namespace unvell.ReoGrid
                 Width = ScrollBarSize,
                 SmallChange = Worksheet.InitDefaultRowHeight,
             };
+            this.Child = new Canvas();
+            var canvas = Child as Canvas;
 
-           this.Children.Add(this.sheetTab);
-            this.Children.Add(this.horScrollbar);
+           canvas.Children.Add(this.sheetTab);
+           canvas.Children.Add(this.horScrollbar);
 
             Grid.SetColumn(this.horScrollbar, 1);
 
             //this.Children.Add(this.bottomGrid);
-            this.Children.Add(this.verScrollbar);
+            canvas.Children.Add(this.verScrollbar);
 
             this.horScrollbar.Scroll += (s, e) =>
             {
@@ -166,7 +158,7 @@ namespace unvell.ReoGrid
                 Margin = new Thickness(0),
             };
 
-            this.Children.Add(editTextbox);
+            canvas.Children.Add(editTextbox);
 
             this.adapter = new ReoGridWPFControlAdapter(this);
             this.adapter.editTextbox = this.editTextbox;
@@ -194,22 +186,6 @@ namespace unvell.ReoGrid
             this.AddHandler(PointerReleasedEvent, MouseUpHandler, handledEventsToo: true);
             PointerMoved += OnMouseMove;
             PointerWheelChanged += OnMouseWheel;
-
-        }
-
-        protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e)
-        {
-            base.OnAttachedToVisualTree(e);
-            Initialize();
-        }
-
-        async void Initialize()
-        {
-
-           var selfVisual = ElementComposition.GetElementVisual(this)!;
-           var compositor = selfVisual.Compositor;
-           var customVisual = compositor.CreateCustomVisual(new ReoGridControlVisualHandler(){TheControl = this});
-           ElementComposition.SetElementChildVisual(this, customVisual);
 
         }
 
@@ -280,7 +256,7 @@ namespace unvell.ReoGrid
 
         private void SetHorizontalScrollBarSize()
         {
-            double hsbWidth = this.Width;
+            double hsbWidth = this.Bounds.Width;
 
             if (this.sheetTab.IsVisible)
             {
@@ -320,8 +296,8 @@ namespace unvell.ReoGrid
 
         private void UpdateSheetTabAndScrollBarsLayout()
         {
-            Canvas.SetTop(this.sheetTab, this.Height - ScrollBarSize);
-            Canvas.SetTop(this.horScrollbar, this.Height - ScrollBarSize);
+            Canvas.SetTop(this.sheetTab, this.Bounds.Size.Height - ScrollBarSize);
+            Canvas.SetTop(this.horScrollbar, this.Bounds.Size.Height - ScrollBarSize);
 
             this.sheetTab.Height = ScrollBarSize;
             this.horScrollbar.Height = ScrollBarSize;
@@ -419,7 +395,7 @@ namespace unvell.ReoGrid
         /// Handle repaint event to draw component.
         /// </summary>
         /// <param name="dc">Platform independence drawing context.</param>
-        public /*override*/ void Render(Avalonia.Media.DrawingContext dc)
+        public override void Render(Avalonia.Media.DrawingContext dc)
         {
 #if DEBUG
             Stopwatch watch = Stopwatch.StartNew();
@@ -661,8 +637,8 @@ namespace unvell.ReoGrid
 
             public Rectangle GetContainerBounds()
             {
-                double w = this.canvas.Width;
-                double h = this.canvas.Height + 1;
+                double w = this.canvas.Bounds.Width;
+                double h = this.canvas.Bounds.Height + 1;
 
                 if (this.canvas.verScrollbar.IsVisible)
                 {
@@ -691,10 +667,10 @@ namespace unvell.ReoGrid
                 this.canvas.InvalidateVisual();
             }
 
-            public void ChangeBackColor(Color color)
-            {
-                this.canvas.Background = new SolidColorBrush(color);
-            }
+            //public void ChangeBackColor(Color color)
+            //{
+            //    ((Canvas)this.canvas.Child).Background = new SolidColorBrush(color);
+            //}
 
             public bool IsVisible
             {

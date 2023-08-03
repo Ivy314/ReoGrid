@@ -500,16 +500,16 @@ namespace unvell.ReoGrid.Rendering
         }
         #endregion // Utility
 
-        internal Avalonia.Media.DashStyle ToWPFDashStyle(LineStyles style)
+        internal Avalonia.Media.Immutable.ImmutableDashStyle ToWPFDashStyle(LineStyles style)
         {
             switch (style)
             {
                 default:
-                case LineStyles.Solid: return (DashStyle)Avalonia.Media.DashStyle.Dot;
-                case LineStyles.Dot: return (DashStyle)Avalonia.Media.DashStyle.Dot;
-                case LineStyles.Dash: return (DashStyle)Avalonia.Media.DashStyle.Dash;
-                case LineStyles.DashDot: return (DashStyle)Avalonia.Media.DashStyle.DashDot;
-                case LineStyles.DashDotDot: return (DashStyle)Avalonia.Media.DashStyle.DashDotDot;
+                case LineStyles.Solid: return (ImmutableDashStyle)Avalonia.Media.DashStyle.Dot;
+                case LineStyles.Dot: return (ImmutableDashStyle)Avalonia.Media.DashStyle.Dot;
+                case LineStyles.Dash: return (ImmutableDashStyle)Avalonia.Media.DashStyle.Dash;
+                case LineStyles.DashDot: return (ImmutableDashStyle)Avalonia.Media.DashStyle.DashDot;
+                case LineStyles.DashDotDot: return (ImmutableDashStyle)Avalonia.Media.DashStyle.DashDotDot;
             }
         }
 
@@ -743,7 +743,8 @@ namespace unvell.ReoGrid.Rendering
         {
             var ft = new Avalonia.Media.FormattedText(text,
                 System.Globalization.CultureInfo.CurrentCulture, FlowDirection.LeftToRight,
-                this.headerTextTypeface??Typeface.Default, headerTextScale / 72f * 96f, brush);
+                Typeface.Default, headerTextScale / 72f * 96f, brush);
+
 
             base.PlatformGraphics.DrawText(ft,
                 new Point(rect.X + (rect.Width - ft.Width) / 2, rect.Y + (rect.Height - ft.Height) / 2));

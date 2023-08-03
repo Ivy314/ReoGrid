@@ -39,16 +39,19 @@ using Color = Avalonia.Media.Color;
 using unvell.ReoGrid.Main;
 using unvell.ReoGrid.Views;
 using System.Drawing;
+using Avalonia.Media.Immutable;
 using unvell.ReoGrid.Rendering;
 using Brushes = Avalonia.Media.Brushes;
 using DrawingContext = Avalonia.Media.DrawingContext;
 using Point = Avalonia.Point;
 using Size = Avalonia.Size;
 using Pen = Avalonia.Media.Pen;
+using Avalonia.Rendering.Composition;
 
 namespace unvell.ReoGrid.WPF
 {
-    internal class SheetTabControl : Grid , ISheetTabControl
+
+    internal class SheetTabControl : Decorator, ISheetTabControl
     {
         internal Grid canvas = new Grid()
         {
@@ -63,14 +66,16 @@ namespace unvell.ReoGrid.WPF
 
         public SheetTabControl()
         {
-            this.Background = new SolidColorBrush(SystemColors.Control.ToAvalonia());
+            this.Child = new Grid();
+            var grid = Child as Grid;
+            grid.Background = new SolidColorBrush(SystemColors.Control.ToAvalonia());
             this.BorderColor = Colors.DeepSkyBlue;
 
-            this.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(20) });
-            this.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(20) });
-            this.ColumnDefinitions.Add(new ColumnDefinition { });
-            this.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(30) });
-            this.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(5) });
+            grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(20) });
+            grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(20) });
+            grid.ColumnDefinitions.Add(new ColumnDefinition { });
+            grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(30) });
+            grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(5) });
 
             var pleft = new ArrowBorder(this)
             {
@@ -110,13 +115,13 @@ namespace unvell.ReoGrid.WPF
 
             this.canvas.RenderTransform = new TranslateTransform(0, 0);
 
-            this.Children.Add(this.canvas);
+            grid.Children.Add(this.canvas);
             Grid.SetColumn(this.canvas, 2);
 
-            this.Children.Add(pleft);
+            grid.Children.Add(pleft);
             Grid.SetColumn(pleft, 0);
 
-            this.Children.Add(pright);
+            grid.Children.Add(pright);
             Grid.SetColumn(pright, 1);
 
 
@@ -143,7 +148,7 @@ namespace unvell.ReoGrid.WPF
                 }
             };
 
-            this.Children.Add(newSheetImage);
+            grid.Children.Add(newSheetImage);
             Grid.SetColumn(newSheetImage, 3);
 
             Border rightThumb = new Border
@@ -154,7 +159,7 @@ namespace unvell.ReoGrid.WPF
                 Margin = new Thickness(0, 1, 0, 0),
                 HorizontalAlignment = HorizontalAlignment.Center,
             };
-            this.Children.Add(rightThumb);
+            grid.Children.Add(rightThumb);
             Grid.SetColumn(rightThumb, 4);
 
             this.scrollTimer = new Avalonia.Threading.DispatcherTimer()
@@ -176,7 +181,7 @@ namespace unvell.ReoGrid.WPF
                 }
                 else if (this.scrollRightDown)
                 {
-                    double max = this.ColumnDefinitions[2].ActualWidth - this.canvas.Width;
+                    double max = grid.ColumnDefinitions[2].ActualWidth - this.canvas.Width;
 
                     if (tt > max)
                     {
@@ -460,7 +465,8 @@ namespace unvell.ReoGrid.WPF
 
         //private GuidelineSet gls = new GuidelineSet();
 
-        public /*override*/ void Render(DrawingContext dc)
+
+        public override void Render(DrawingContext dc)
         {
 
             var g = dc;
