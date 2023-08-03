@@ -18,6 +18,8 @@
 
 #if WINFORM || WPF
 using unvell.Common.Win32Lib;
+#elif AVALONIA
+using Avalonia.Input;
 #endif // WINFORM || WPF
 
 using System;
@@ -41,9 +43,15 @@ namespace unvell.Common
 		{
 			return ((Win32.GetKeyState(vkey) >> 15) & 1) == 1;
 		}
+#elif AVALONIA
+        public static bool IsKeyDown(Key vkey)
+        {
+            return false;
+        }
+
 #endif // WINFORM || WPF
 
-		private static MD5 md5 = null;
+        private static MD5 md5 = null;
 
 		internal static byte[] GetMD5Hash(string str)
 		{

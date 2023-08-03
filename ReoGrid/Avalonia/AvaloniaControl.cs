@@ -28,6 +28,7 @@ using Avalonia.Threading;
 using System;
 using System.Diagnostics;
 using Avalonia.Interactivity;
+using Avalonia.Rendering.Composition;
 using unvell.Common;
 using unvell.ReoGrid.Drawing;
 using unvell.ReoGrid.Graphics;
@@ -39,147 +40,154 @@ using unvell.ReoGrid.WPF;
 using HorizontalAlignment = Avalonia.Layout.HorizontalAlignment;
 using Point = unvell.ReoGrid.Graphics.Point;
 using WPFPoint = Avalonia.Point;
-using System.IO;
-using Avalonia.Controls.Presenters;
 
 namespace unvell.ReoGrid
 {
-	/// <summary>
-	/// ReoGrid Spreadsheet Control
-	/// </summary>
-	public partial class ReoGridControl : Control, IVisualWorkbook,
-		IRangePickableControl, IContextMenuControl, IPersistenceWorkbook, IActionControl, IWorkbook
-	{
-		internal const int ScrollBarSize = 18;
 
-		private ReoGridWPFControlAdapter adapter;
-		//private Grid bottomGrid;
-		private SheetTabControl sheetTab;
-		private InputTextBox editTextbox;
+    class ReoGridControlVisualHandler : CompositionCustomVisualHandler
+    {
+        public ReoGridControl TheControl { get; set; }
+        public override void OnRender(ImmediateDrawingContext drawingContext)
+        {
+        }
+    }
 
-		private ScrollBar horScrollbar;
-		private ScrollBar verScrollbar;
+    /// <summary>
+        /// ReoGrid Spreadsheet Control
+        /// </summary>
+        public partial class ReoGridControl : Canvas, IVisualWorkbook,
+        IRangePickableControl, IContextMenuControl, IPersistenceWorkbook, IActionControl, IWorkbook
+    {
+        internal const int ScrollBarSize = 18;
 
-		private Canvas canvas;
+        private ReoGridWPFControlAdapter adapter;
+        //private Grid bottomGrid;
+        private SheetTabControl sheetTab;
+        private InputTextBox editTextbox;
 
-		//private DockPanel layout;
+        private ScrollBar horScrollbar;
+        private ScrollBar verScrollbar;
 
-		/// <summary>
-		/// Create ReoGrid spreadsheet control
-		/// </summary>
-		public ReoGridControl()
-		{
-			//this.SnapsToDevicePixels = true;
-			this.Focusable = true;
-			//this.FocusVisualStyle = null;
+        //private Canvas canvas;
 
-			this.BeginInit();
-            this.canvas = new Canvas();
+        //private DockPanel layout;
 
-			//layout = new DockPanel();
+        /// <summary>
+        /// Create ReoGrid spreadsheet control
+        /// </summary>
+        public ReoGridControl()
+        {
+            //this.SnapsToDevicePixels = true;
+            this.Focusable = true;
+            //this.FocusVisualStyle = null;
 
-			//this.bottomGrid = new DockPanel() { Height = ScrollBarSize };
+            this.BeginInit();
+            //this.canvas = new Canvas();
 
-			//this.bottomGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(ScrollBarWidth) });
+            //layout = new DockPanel();
 
-			this.sheetTab = new SheetTabControl()
-			{
-				ControlWidth = 400,
-			};
+            //this.bottomGrid = new DockPanel() { Height = ScrollBarSize };
 
-			this.horScrollbar = new ScrollBar()
-			{
-				Orientation = Orientation.Horizontal,
-				Height = ScrollBarSize,
-				SmallChange = Worksheet.InitDefaultColumnWidth,
-			};
+            //this.bottomGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(ScrollBarWidth) });
 
-			this.verScrollbar = new Avalonia.Controls.Primitives.ScrollBar()
-			{
-				Orientation = Orientation.Vertical,
-				Width = ScrollBarSize,
-				SmallChange = Worksheet.InitDefaultRowHeight,
-			};
+            this.sheetTab = new SheetTabControl()
+            {
+                ControlWidth = 400,
+            };
 
-			this.canvas.Children.Add(this.sheetTab);
-			this.canvas.Children.Add(this.horScrollbar);
+            this.horScrollbar = new ScrollBar()
+            {
+                Orientation = Orientation.Horizontal,
+                Height = ScrollBarSize,
+                SmallChange = Worksheet.InitDefaultColumnWidth,
+            };
 
-			Grid.SetColumn(this.horScrollbar, 1);
+            this.verScrollbar = new Avalonia.Controls.Primitives.ScrollBar()
+            {
+                Orientation = Orientation.Vertical,
+                Width = ScrollBarSize,
+                SmallChange = Worksheet.InitDefaultRowHeight,
+            };
 
-			//this.Children.Add(this.bottomGrid);
-			this.canvas.Children.Add(this.verScrollbar);
+           this.Children.Add(this.sheetTab);
+            this.Children.Add(this.horScrollbar);
 
-			this.horScrollbar.Scroll += (s, e) =>
-			{
-				if (this.currentWorksheet.ViewportController is IScrollableViewportController)
-				{
-					((IScrollableViewportController)this.currentWorksheet.ViewportController).HorizontalScroll(e.NewValue);
-				}
-			};
+            Grid.SetColumn(this.horScrollbar, 1);
 
-			this.verScrollbar.Scroll += (s, e) =>
-			{
-				if (this.currentWorksheet.ViewportController is IScrollableViewportController)
-				{
-					((IScrollableViewportController)this.currentWorksheet.ViewportController).VerticalScroll(e.NewValue);
-				}
-			};
+            //this.Children.Add(this.bottomGrid);
+            this.Children.Add(this.verScrollbar);
 
-			this.sheetTab.SplitterMoving += (s, e) =>
+            this.horScrollbar.Scroll += (s, e) =>
+            {
+                if (this.currentWorksheet.ViewportController is IScrollableViewportController)
+                {
+                    ((IScrollableViewportController)this.currentWorksheet.ViewportController).HorizontalScroll(e.NewValue);
+                }
+            };
+
+            this.verScrollbar.Scroll += (s, e) =>
+            {
+                if (this.currentWorksheet.ViewportController is IScrollableViewportController)
+                {
+                    ((IScrollableViewportController)this.currentWorksheet.ViewportController).VerticalScroll(e.NewValue);
+                }
+            };
+
+            this.sheetTab.SplitterMoving += (s, e) =>
             {
                 double width = 0;//  Avalonia.Input.MouseDevice.GetPosition(this).X + 3;
-				if (width < 75) width = 75;
-				if (width > this.Bounds.Size.Width - ScrollBarSize) width = this.Bounds.Size.Width - ScrollBarSize;
+                if (width < 75) width = 75;
+                if (width > this.Bounds.Size.Width - ScrollBarSize) width = this.Bounds.Size.Width - ScrollBarSize;
 
-				this.SheetTabWidth = width;
+                this.SheetTabWidth = width;
 
-				this.UpdateSheetTabAndScrollBarsLayout();
-				//this.bottomGrid.ColumnDefinitions[0].Width = new GridLength(width);
+                this.UpdateSheetTabAndScrollBarsLayout();
+                //this.bottomGrid.ColumnDefinitions[0].Width = new GridLength(width);
 
-				//double newScrollWidth = this.Bounds.Size.Width
-				//	- this.bottomGrid.ColumnDefinitions[0].Width - this.bottomGrid.ColumnDefinitions[2].Width;
+                //double newScrollWidth = this.Bounds.Size.Width
+                //	- this.bottomGrid.ColumnDefinitions[0].Width - this.bottomGrid.ColumnDefinitions[2].Width;
 
-				//if (newScrollWidth < 0) newScrollWidth = 0;
+                //if (newScrollWidth < 0) newScrollWidth = 0;
 
-				//this.bottomGrid.ColumnDefinitions[1].Width = new GridLength(newScrollWidth);
-				//this.horScrollbar.Width = this.bottomGrid.ColumnDefinitions[1].Width;
-			};
+                //this.bottomGrid.ColumnDefinitions[1].Width = new GridLength(newScrollWidth);
+                //this.horScrollbar.Width = this.bottomGrid.ColumnDefinitions[1].Width;
+            };
 
-			this.InitControl();
+            this.InitControl();
 
-			this.editTextbox = new InputTextBox()
-			{
-				Owner = this,
-				//BorderThickness = new Thickness(0),
-				//Visibility = Visibility.Hidden,
-				//HorizontalScrollBarVisibility = ScrollBarVisibility.Hidden,
-				//VerticalScrollBarVisibility = ScrollBarVisibility.Hidden,
-				//Padding = new Thickness(0),
-				Margin = new Thickness(0),
-			};
+            this.editTextbox = new InputTextBox()
+            {
+                Owner = this,
+                //BorderThickness = new Thickness(0),
+                //Visibility = Visibility.Hidden,
+                //HorizontalScrollBarVisibility = ScrollBarVisibility.Hidden,
+                //VerticalScrollBarVisibility = ScrollBarVisibility.Hidden,
+                //Padding = new Thickness(0),
+                Margin = new Thickness(0),
+            };
 
-			this.canvas.Children.Add(editTextbox);
+            this.Children.Add(editTextbox);
 
-			this.adapter = new ReoGridWPFControlAdapter(this);
-			this.adapter.editTextbox = this.editTextbox;
+            this.adapter = new ReoGridWPFControlAdapter(this);
+            this.adapter.editTextbox = this.editTextbox;
 
-			InitWorkbook(this.adapter);
+            InitWorkbook(this.adapter);
 
-			//TextCompositionManager.AddPreviewTextInputHandler(this, OnTextInputStart);
+            //TextCompositionManager.AddPreviewTextInputHandler(this, OnTextInputStart);
 
-			this.EndInit();
+            this.EndInit();
 
-			this.renderer = new Rendering.WPFRenderer();
+            this.renderer = new Rendering.WPFRenderer();
 
-			Dispatcher.UIThread.InvokeAsync(
-				new Action(delegate ()
-			{
-				if (!string.IsNullOrEmpty(this.LoadFromFile))
-				{
-					var file = new System.IO.FileInfo(this.LoadFromFile);
-					this.currentWorksheet.Load(file.FullName);
-				}
-			}),Avalonia.Threading.DispatcherPriority.Input);
+            Dispatcher.UIThread.InvokeAsync(
+                new Action(delegate ()
+            {
+                if (!string.IsNullOrEmpty(this.LoadFromFile))
+                {
+                    var file = new System.IO.FileInfo(this.LoadFromFile);
+                    this.currentWorksheet.Load(file.FullName);
+                }
+            }),Avalonia.Threading.DispatcherPriority.Input);
 
             this.SizeChanged += ReoGridControl_SizeChanged;
             this.AddHandler(PointerPressedEvent, MouseDownHandler, handledEventsToo: true);
@@ -188,6 +196,23 @@ namespace unvell.ReoGrid
             PointerWheelChanged += OnMouseWheel;
 
         }
+
+        protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e)
+        {
+            base.OnAttachedToVisualTree(e);
+            Initialize();
+        }
+
+        async void Initialize()
+        {
+
+           var selfVisual = ElementComposition.GetElementVisual(this)!;
+           var compositor = selfVisual.Compositor;
+           var customVisual = compositor.CreateCustomVisual(new ReoGridControlVisualHandler(){TheControl = this});
+           ElementComposition.SetElementChildVisual(this, customVisual);
+
+        }
+
 
         private void MouseUpHandler(object sender, PointerReleasedEventArgs e)
         {
@@ -235,7 +260,7 @@ namespace unvell.ReoGrid
 
         private void ReoGridControl_SizeChanged(object sender, SizeChangedEventArgs e)
         {
-			
+            
             if (this.IsVisible)
             {
                 if (e.PreviousSize.Width > 0)
@@ -254,861 +279,872 @@ namespace unvell.ReoGrid
 
 
         private void SetHorizontalScrollBarSize()
-		{
-			double hsbWidth = this.Width;
+        {
+            double hsbWidth = this.Width;
 
-			if (this.sheetTab.IsVisible)
-			{
-				hsbWidth -= this.SheetTabWidth;
-			}
+            if (this.sheetTab.IsVisible)
+            {
+                hsbWidth -= this.SheetTabWidth;
+            }
 
-			if (this.verScrollbar.IsVisible)
-			{
-				hsbWidth -= ScrollBarSize;
-			}
+            if (this.verScrollbar.IsVisible)
+            {
+                hsbWidth -= ScrollBarSize;
+            }
 
-			if (hsbWidth < 0) hsbWidth = 0;
-			this.horScrollbar.Width = hsbWidth;
-		}
+            if (hsbWidth < 0) hsbWidth = 0;
+            this.horScrollbar.Width = hsbWidth;
+        }
 
-		private void SetSheetTabSize()
-		{
-			double stWidth = 0;
+        private void SetSheetTabSize()
+        {
+            double stWidth = 0;
 
-			if (this.horScrollbar.IsVisible)
-			{
-				stWidth = this.SheetTabWidth;
-			}
-			else
-			{
-				stWidth = this.Width;
-			}
+            if (this.horScrollbar.IsVisible)
+            {
+                stWidth = this.SheetTabWidth;
+            }
+            else
+            {
+                stWidth = this.Width;
+            }
 
-			if (this.verScrollbar.IsVisible)
-			{
-				stWidth -= ScrollBarSize;
-			}
+            if (this.verScrollbar.IsVisible)
+            {
+                stWidth -= ScrollBarSize;
+            }
 
-			if (stWidth < 0) stWidth = 0;
-			this.horScrollbar.Width = stWidth;
-		}
+            if (stWidth < 0) stWidth = 0;
+            this.horScrollbar.Width = stWidth;
+        }
 
-		private void UpdateSheetTabAndScrollBarsLayout()
-		{
-			Canvas.SetTop(this.sheetTab, this.Height - ScrollBarSize);
-			Canvas.SetTop(this.horScrollbar, this.Height - ScrollBarSize);
+        private void UpdateSheetTabAndScrollBarsLayout()
+        {
+            Canvas.SetTop(this.sheetTab, this.Height - ScrollBarSize);
+            Canvas.SetTop(this.horScrollbar, this.Height - ScrollBarSize);
 
-			this.sheetTab.Height = ScrollBarSize;
-			this.horScrollbar.Height = ScrollBarSize;
+            this.sheetTab.Height = ScrollBarSize;
+            this.horScrollbar.Height = ScrollBarSize;
 
-			Canvas.SetLeft(verScrollbar, this.Bounds.Size.Width - ScrollBarSize);
+            Canvas.SetLeft(verScrollbar, this.Bounds.Size.Width - ScrollBarSize);
 
-			var vsbHeight = this.Bounds.Size.Height - ScrollBarSize;
-			if (vsbHeight < 0) vsbHeight = 0;
-			verScrollbar.Height = vsbHeight;
+            var vsbHeight = this.Bounds.Size.Height - ScrollBarSize;
+            if (vsbHeight < 0) vsbHeight = 0;
+            verScrollbar.Height = vsbHeight;
 
-			if (this.sheetTab.IsVisible
-				&& this.horScrollbar.IsVisible)
-			{
-				this.sheetTab.Width = this.SheetTabWidth;
+            if (this.sheetTab.IsVisible
+                && this.horScrollbar.IsVisible)
+            {
+                this.sheetTab.Width = this.SheetTabWidth;
 
-				Canvas.SetLeft(this.horScrollbar, this.SheetTabWidth);
-				SetHorizontalScrollBarSize();
-			}
-			else if (this.sheetTab.IsVisible)
-			{
-				this.sheetTab.Width = this.Width;
-			}
-			else if (this.horScrollbar.IsVisible)
-			{
-				Canvas.SetLeft(this.horScrollbar, 0);
-				SetHorizontalScrollBarSize();
-			}
-			else
-			{
-				this.verScrollbar.Height = this.Bounds.Size.Height;
-			}
+                Canvas.SetLeft(this.horScrollbar, this.SheetTabWidth);
+                SetHorizontalScrollBarSize();
+            }
+            else if (this.sheetTab.IsVisible)
+            {
+                this.sheetTab.Width = this.Width;
+            }
+            else if (this.horScrollbar.IsVisible)
+            {
+                Canvas.SetLeft(this.horScrollbar, 0);
+                SetHorizontalScrollBarSize();
+            }
+            else
+            {
+                this.verScrollbar.Height = this.Bounds.Size.Height;
+            }
 
-			this.currentWorksheet.UpdateViewportControllBounds();
-		}
+            this.currentWorksheet.UpdateViewportControllBounds();
+        }
 
-		private void ShowSheetTabControl()
-		{
-			if (!this.sheetTab.IsVisible)
-			{
-				this.sheetTab.IsVisible = true;
-				this.UpdateSheetTabAndScrollBarsLayout();
-			}
-		}
+        private void ShowSheetTabControl()
+        {
+            if (!this.sheetTab.IsVisible)
+            {
+                this.sheetTab.IsVisible = true;
+                this.UpdateSheetTabAndScrollBarsLayout();
+            }
+        }
 
-		private void HideSheetTabControl()
-		{
-			if (this.sheetTab.IsVisible)
-			{
-				this.sheetTab.IsVisible = false;
-				this.UpdateSheetTabAndScrollBarsLayout();
-			}
-		}
+        private void HideSheetTabControl()
+        {
+            if (this.sheetTab.IsVisible)
+            {
+                this.sheetTab.IsVisible = false;
+                this.UpdateSheetTabAndScrollBarsLayout();
+            }
+        }
 
-		private void ShowHorScrollBar()
-		{
-			if (!this.horScrollbar.IsVisible)
-			{
-				this.horScrollbar.IsVisible = true;
-				this.UpdateSheetTabAndScrollBarsLayout();
-			}
-		}
+        private void ShowHorScrollBar()
+        {
+            if (!this.horScrollbar.IsVisible)
+            {
+                this.horScrollbar.IsVisible = true;
+                this.UpdateSheetTabAndScrollBarsLayout();
+            }
+        }
 
-		private void HideHorScrollBar()
-		{
-			if (this.horScrollbar.IsVisible)
-			{
-				this.horScrollbar.IsVisible = false;
-				this.UpdateSheetTabAndScrollBarsLayout();
-			}
-		}
+        private void HideHorScrollBar()
+        {
+            if (this.horScrollbar.IsVisible)
+            {
+                this.horScrollbar.IsVisible = false;
+                this.UpdateSheetTabAndScrollBarsLayout();
+            }
+        }
 
-		private void ShowVerScrollBar()
-		{
-			if (!this.verScrollbar.IsVisible)
-			{
-				this.verScrollbar.IsVisible = true;
-				this.UpdateSheetTabAndScrollBarsLayout();
-			}
-		}
+        private void ShowVerScrollBar()
+        {
+            if (!this.verScrollbar.IsVisible)
+            {
+                this.verScrollbar.IsVisible = true;
+                this.UpdateSheetTabAndScrollBarsLayout();
+            }
+        }
 
-		private void HideVerScrollBar()
-		{
-			if (this.verScrollbar.IsVisible)
-			{
-				this.verScrollbar.IsVisible = false;
-				this.UpdateSheetTabAndScrollBarsLayout();
-			}
-		}
+        private void HideVerScrollBar()
+        {
+            if (this.verScrollbar.IsVisible)
+            {
+                this.verScrollbar.IsVisible = false;
+                this.UpdateSheetTabAndScrollBarsLayout();
+            }
+        }
 
-		#endregion // SheetTab & Scroll Bars Visibility
+        #endregion // SheetTab & Scroll Bars Visibility
 
-		#region Render
+        #region Render
 
-		/// <summary>
-		/// Handle repaint event to draw component.
-		/// </summary>
-		/// <param name="dc">Platform independence drawing context.</param>
-		public override void Render(Avalonia.Media.DrawingContext dc)
-		{
+        /// <summary>
+        /// Handle repaint event to draw component.
+        /// </summary>
+        /// <param name="dc">Platform independence drawing context.</param>
+        public /*override*/ void Render(Avalonia.Media.DrawingContext dc)
+        {
 #if DEBUG
-			Stopwatch watch = Stopwatch.StartNew();
+            Stopwatch watch = Stopwatch.StartNew();
 #endif
-			canvas.Render(dc);
-			if (this.currentWorksheet != null
-				&& this.currentWorksheet.workbook != null
-				&& this.currentWorksheet.controlAdapter != null)
-			{
-				SolidColorBrush bgBrush;
-				if (this.controlStyle.TryGetColor(ControlAppearanceColors.GridBackground, out SolidColor bgColor))
-				{
-					bgBrush = new SolidColorBrush(bgColor);
-				}
-				else
-				{
-					bgBrush = new SolidColorBrush(Colors.White);
-				}
+            if (this.currentWorksheet != null
+                && this.currentWorksheet.workbook != null
+                && this.currentWorksheet.controlAdapter != null)
+            {
+                SolidColorBrush bgBrush;
+                if (this.controlStyle.TryGetColor(ControlAppearanceColors.GridBackground, out SolidColor bgColor))
+                {
+                    bgBrush = new SolidColorBrush(bgColor);
+                }
+                else
+                {
+                    bgBrush = new SolidColorBrush(Colors.White);
+                }
 
-				dc.DrawRectangle(bgBrush, null, new Rect(0, 0, this.Bounds.Size.Width, this.Bounds.Size.Height));
+                dc.DrawRectangle(bgBrush, null, new Rect(0, 0, this.Bounds.Size.Width, this.Bounds.Size.Height));
 
-				this.renderer.Reset();
+                this.renderer.Reset();
 
-				((WPFRenderer)this.renderer).SetPlatformGraphics(dc);
+                ((WPFRenderer)this.renderer).SetPlatformGraphics(dc);
 
-				var rgdc = new CellDrawingContext(this.currentWorksheet, DrawMode.View, this.renderer);
-				this.currentWorksheet.ViewportController.Draw(rgdc);
-			}
+                var rgdc = new CellDrawingContext(this.currentWorksheet, DrawMode.View, this.renderer);
+                this.currentWorksheet.ViewportController.Draw(rgdc);
+            }
 
 #if DEBUG
-			watch.Stop();
-			long ms = watch.ElapsedMilliseconds;
-			if (ms > 30)
-			{
-				Debug.WriteLine(string.Format("end draw: {0} ms.", watch.ElapsedMilliseconds));
-			}
+            watch.Stop();
+            long ms = watch.ElapsedMilliseconds;
+            if (ms > 30)
+            {
+                Debug.WriteLine(string.Format("end draw: {0} ms.", watch.ElapsedMilliseconds));
+            }
 #endif
-		}
+            base.Render(dc);
+        }
 
-		#endregion // Render
+        #endregion // Render
 
-		#region Mouse
+        #region Mouse
 
-		bool mouseCaptured = false;
+        bool mouseCaptured = false;
 
-		protected void OnMouseMove(object sender, PointerEventArgs e)
-		{
-			this.OnWorksheetMouseMove(e.GetPosition(this), WPFUtility.ConvertToUIMouseButtons(MouseButton.None));
-		}
+        protected void OnMouseMove(object sender, PointerEventArgs e)
+        {
+            this.OnWorksheetMouseMove(e.GetPosition(this), WPFUtility.ConvertToUIMouseButtons(MouseButton.None));
+        }
 
 
-		protected void OnMouseWheel(object sender, PointerWheelEventArgs e)
-		{
-			this.currentWorksheet.OnMouseWheel(e.GetPosition(this), (int)e.Delta.Length, WPFUtility.ConvertToUIMouseButtons(MouseButton.Middle));
-		}
+        protected void OnMouseWheel(object sender, PointerWheelEventArgs e)
+        {
+            this.currentWorksheet.OnMouseWheel(e.GetPosition(this), (int)e.Delta.Length, WPFUtility.ConvertToUIMouseButtons(MouseButton.Middle));
+        }
 
-		#endregion // Mouse
+        #endregion // Mouse
 
-		#region Keyboard
+        #region Keyboard
 
-		/// <summary>
-		/// Handle event when key down.
-		/// </summary>
-		/// <param name="e"></param>
-		protected override void OnKeyDown(KeyEventArgs e)
-		{
-			if (!this.currentWorksheet.IsEditing)
-			{
-				var wfkeys = (KeyCode)Avalonia.Win32.Input.KeyInterop.VirtualKeyFromKey(e.Key);
+        /// <summary>
+        /// Handle event when key down.
+        /// </summary>
+        /// <param name="e"></param>
+        protected override void OnKeyDown(KeyEventArgs e)
+        {
+            if (!this.currentWorksheet.IsEditing)
+            {
+                var wfkeys = (KeyCode)Avalonia.Win32.Input.KeyInterop.VirtualKeyFromKey(e.Key);
 
-				if ((e.KeyModifiers & KeyModifiers.Control) == KeyModifiers.Control)
-				{
-					wfkeys |= KeyCode.Control;
-				}
-				else if ((e.KeyModifiers & KeyModifiers.Shift) == KeyModifiers.Shift)
-				{
-					wfkeys |= KeyCode.Shift;
-				}
-				else if ((e.KeyModifiers & KeyModifiers.Alt) == KeyModifiers.Alt)
-				{
-					wfkeys |= KeyCode.Alt;
-				}
+                if ((e.KeyModifiers & KeyModifiers.Control) == KeyModifiers.Control)
+                {
+                    wfkeys |= KeyCode.Control;
+                }
+                else if ((e.KeyModifiers & KeyModifiers.Shift) == KeyModifiers.Shift)
+                {
+                    wfkeys |= KeyCode.Shift;
+                }
+                else if ((e.KeyModifiers & KeyModifiers.Alt) == KeyModifiers.Alt)
+                {
+                    wfkeys |= KeyCode.Alt;
+                }
 
-				if (wfkeys != KeyCode.Control
-					&& wfkeys != KeyCode.Shift
-					&& wfkeys != KeyCode.Alt)
-				{
-					if (this.currentWorksheet.OnKeyDown(wfkeys))
-					{
-						e.Handled = true;
-					}
-				}
-			}
-		}
+                if (wfkeys != KeyCode.Control
+                    && wfkeys != KeyCode.Shift
+                    && wfkeys != KeyCode.Alt)
+                {
+                    if (this.currentWorksheet.OnKeyDown(wfkeys))
+                    {
+                        e.Handled = true;
+                    }
+                }
+            }
+        }
 
-		protected override void OnKeyUp(KeyEventArgs e)
-		{
-			if (!this.currentWorksheet.IsEditing)
-			{
-				var wfkeys = (KeyCode)Avalonia.Win32.Input.KeyInterop.VirtualKeyFromKey(e.Key);
+        protected override void OnKeyUp(KeyEventArgs e)
+        {
+            if (!this.currentWorksheet.IsEditing)
+            {
+                var wfkeys = (KeyCode)Avalonia.Win32.Input.KeyInterop.VirtualKeyFromKey(e.Key);
 
-				if ((e.KeyModifiers & KeyModifiers.Control) == KeyModifiers.Control)
-				{
-					wfkeys |= KeyCode.Control;
-				}
-				else if ((e.KeyModifiers & KeyModifiers.Shift) == KeyModifiers.Shift)
-				{
-					wfkeys |= KeyCode.Shift;
-				}
-				else if ((e.KeyModifiers & KeyModifiers.Alt) == KeyModifiers.Alt)
-				{
-					wfkeys |= KeyCode.Alt;
-				}
+                if ((e.KeyModifiers & KeyModifiers.Control) == KeyModifiers.Control)
+                {
+                    wfkeys |= KeyCode.Control;
+                }
+                else if ((e.KeyModifiers & KeyModifiers.Shift) == KeyModifiers.Shift)
+                {
+                    wfkeys |= KeyCode.Shift;
+                }
+                else if ((e.KeyModifiers & KeyModifiers.Alt) == KeyModifiers.Alt)
+                {
+                    wfkeys |= KeyCode.Alt;
+                }
 
-				if (wfkeys != KeyCode.Control
-					&& wfkeys != KeyCode.Shift
-					&& wfkeys != KeyCode.Alt)
-				{
-					if (this.currentWorksheet.OnKeyUp(wfkeys))
-					{
-						e.Handled = true;
-					}
-				}
+                if (wfkeys != KeyCode.Control
+                    && wfkeys != KeyCode.Shift
+                    && wfkeys != KeyCode.Alt)
+                {
+                    if (this.currentWorksheet.OnKeyUp(wfkeys))
+                    {
+                        e.Handled = true;
+                    }
+                }
 
-				//base.OnKeyUp(e);
-			}
-		}
+                //base.OnKeyUp(e);
+            }
+        }
 
-		/// <summary>
-		/// Handle event when text inputted
-		/// </summary>
-		/// <param name="e"></param>
-		protected override void OnTextInput(TextInputEventArgs e)
-		{
-			base.OnTextInput(e);
-		}
+        /// <summary>
+        /// Handle event when text inputted
+        /// </summary>
+        /// <param name="e"></param>
+        protected override void OnTextInput(TextInputEventArgs e)
+        {
+            base.OnTextInput(e);
+        }
 
-		private void OnTextInputStart(object sender, TextInputEventArgs args)
-		{
-			if (!this.currentWorksheet.IsEditing)
-			{
-				this.currentWorksheet.StartEdit();
-				this.currentWorksheet.CellEditText = string.Empty;
-			}
-		}
+        private void OnTextInputStart(object sender, TextInputEventArgs args)
+        {
+            if (!this.currentWorksheet.IsEditing)
+            {
+                this.currentWorksheet.StartEdit();
+                this.currentWorksheet.CellEditText = string.Empty;
+            }
+        }
 
-		#endregion // Keyboard
+        #endregion // Keyboard
 
-		#region Adapter
-		private class ReoGridWPFControlAdapter : IControlAdapter
-		{
-			#region Constructor
-			private readonly ReoGridControl canvas;
-			internal InputTextBox editTextbox;
+        #region Adapter
+        private class ReoGridWPFControlAdapter : IControlAdapter
+        {
+            #region Constructor
+            private readonly ReoGridControl canvas;
+            internal InputTextBox editTextbox;
 
-			internal ReoGridWPFControlAdapter(ReoGridControl canvas)
-			{
-				this.canvas = canvas;
-			}
-			#endregion // Constructor
+            internal ReoGridWPFControlAdapter(ReoGridControl canvas)
+            {
+                this.canvas = canvas;
+            }
+            #endregion // Constructor
 
-			#region IControlAdapter Members
+            #region IControlAdapter Members
 
-			public IVisualWorkbook ControlInstance
-			{
-				get { return this.canvas; }
-			}
+            public IVisualWorkbook ControlInstance
+            {
+                get { return this.canvas; }
+            }
 
-			public ControlAppearanceStyle ControlStyle { get { return this.canvas.controlStyle; } }
+            public ControlAppearanceStyle ControlStyle { get { return this.canvas.controlStyle; } }
 
-			public IRenderer Renderer { get { return this.canvas.renderer; } }
+            public IRenderer Renderer { get { return this.canvas.renderer; } }
 
-			public void ShowContextMenuStrip(ViewTypes viewType, Graphics.Point containerLocation)
-			{
-				switch (viewType)
-				{
-					default:
-					case ViewTypes.Cells:
-						this.canvas.BaseContextMenu = this.canvas.CellsContextMenu;
-						break;
+            public void ShowContextMenuStrip(ViewTypes viewType, Graphics.Point containerLocation)
+            {
+                switch (viewType)
+                {
+                    default:
+                    case ViewTypes.Cells:
+                        this.canvas.BaseContextMenu = this.canvas.CellsContextMenu;
+                        break;
 
-					case ViewTypes.ColumnHeader:
-						this.canvas.BaseContextMenu = this.canvas.ColumnHeaderContextMenu;
-						break;
+                    case ViewTypes.ColumnHeader:
+                        this.canvas.BaseContextMenu = this.canvas.ColumnHeaderContextMenu;
+                        break;
 
-					case ViewTypes.RowHeader:
-						this.canvas.BaseContextMenu = this.canvas.RowHeaderContextMenu;
-						break;
+                    case ViewTypes.RowHeader:
+                        this.canvas.BaseContextMenu = this.canvas.RowHeaderContextMenu;
+                        break;
 
-					case ViewTypes.LeadHeader:
-						this.canvas.BaseContextMenu = this.canvas.LeadHeaderContextMenu;
-						break;
-				}
-			}
+                    case ViewTypes.LeadHeader:
+                        this.canvas.BaseContextMenu = this.canvas.LeadHeaderContextMenu;
+                        break;
+                }
+            }
 
-			private Cursor oldCursor = null;
+            private Cursor oldCursor = null;
 
-			public void ChangeCursor(CursorStyle cursor)
-			{
-				oldCursor = this.canvas.Cursor;
+            public void ChangeCursor(CursorStyle cursor)
+            {
+                oldCursor = this.canvas.Cursor;
 
-				switch (cursor)
-				{
-					default:
-					case CursorStyle.PlatformDefault: this.canvas.Cursor = new Cursor(StandardCursorType.Arrow); break;
-					case CursorStyle.Selection: this.canvas.Cursor = this.canvas.internalCurrentCursor; break;
-					case CursorStyle.Busy: this.canvas.Cursor = new Cursor(StandardCursorType.AppStarting); break;
-					case CursorStyle.Hand: this.canvas.Cursor = new Cursor(StandardCursorType.Hand); break;
-					case CursorStyle.FullColumnSelect: this.canvas.Cursor = this.canvas.builtInFullColSelectCursor; break;
-					case CursorStyle.FullRowSelect: this.canvas.Cursor = this.canvas.builtInFullRowSelectCursor; break;
-					case CursorStyle.ChangeRowHeight: this.canvas.Cursor = new Cursor(StandardCursorType.SizeNorthSouth); break;
-					case CursorStyle.ChangeColumnWidth: this.canvas.Cursor = new Cursor(StandardCursorType.SizeWestEast); break;
-					case CursorStyle.ResizeHorizontal: this.canvas.Cursor = new Cursor(StandardCursorType.SizeWestEast); break;
-					case CursorStyle.ResizeVertical: this.canvas.Cursor = new Cursor(StandardCursorType.SizeNorthSouth); break;
-					case CursorStyle.Move: this.canvas.Cursor = new Cursor(StandardCursorType.SizeAll); break;
-					case CursorStyle.Cross: this.canvas.Cursor = this.canvas.builtInCrossCursor; break;
-				}
-			}
+                switch (cursor)
+                {
+                    default:
+                    case CursorStyle.PlatformDefault: this.canvas.Cursor = new Cursor(StandardCursorType.Arrow); break;
+                    case CursorStyle.Selection: this.canvas.Cursor = this.canvas.internalCurrentCursor; break;
+                    case CursorStyle.Busy: this.canvas.Cursor = new Cursor(StandardCursorType.AppStarting); break;
+                    case CursorStyle.Hand: this.canvas.Cursor = new Cursor(StandardCursorType.Hand); break;
+                    case CursorStyle.FullColumnSelect: this.canvas.Cursor = this.canvas.builtInFullColSelectCursor; break;
+                    case CursorStyle.FullRowSelect: this.canvas.Cursor = this.canvas.builtInFullRowSelectCursor; break;
+                    case CursorStyle.ChangeRowHeight: this.canvas.Cursor = new Cursor(StandardCursorType.SizeNorthSouth); break;
+                    case CursorStyle.ChangeColumnWidth: this.canvas.Cursor = new Cursor(StandardCursorType.SizeWestEast); break;
+                    case CursorStyle.ResizeHorizontal: this.canvas.Cursor = new Cursor(StandardCursorType.SizeWestEast); break;
+                    case CursorStyle.ResizeVertical: this.canvas.Cursor = new Cursor(StandardCursorType.SizeNorthSouth); break;
+                    case CursorStyle.Move: this.canvas.Cursor = new Cursor(StandardCursorType.SizeAll); break;
+                    case CursorStyle.Cross: this.canvas.Cursor = this.canvas.builtInCrossCursor; break;
+                }
+            }
 
-			public void RestoreCursor()
-			{
-				this.canvas.Cursor = oldCursor;
-			}
+            public void RestoreCursor()
+            {
+                this.canvas.Cursor = oldCursor;
+            }
 
-			public void ChangeSelectionCursor(CursorStyle cursor)
-			{
-				switch (cursor)
-				{
-					default:
-					case CursorStyle.PlatformDefault:
-						this.canvas.internalCurrentCursor = new Cursor(StandardCursorType.Arrow);
-						break;
+            public void ChangeSelectionCursor(CursorStyle cursor)
+            {
+                switch (cursor)
+                {
+                    default:
+                    case CursorStyle.PlatformDefault:
+                        this.canvas.internalCurrentCursor = new Cursor(StandardCursorType.Arrow);
+                        break;
 
-					case CursorStyle.Hand:
-						this.canvas.internalCurrentCursor = new Cursor(StandardCursorType.Hand);
-						break;
-				}
-			}
+                    case CursorStyle.Hand:
+                        this.canvas.internalCurrentCursor = new Cursor(StandardCursorType.Hand);
+                        break;
+                }
+            }
 
-			public Rectangle GetContainerBounds()
-			{
-				double w = this.canvas.Width;
-				double h = this.canvas.Height + 1;
+            public Rectangle GetContainerBounds()
+            {
+                double w = this.canvas.Width;
+                double h = this.canvas.Height + 1;
 
-				if (this.canvas.verScrollbar.IsVisible)
-				{
-					w -= ScrollBarSize;
-				}
+                if (this.canvas.verScrollbar.IsVisible)
+                {
+                    w -= ScrollBarSize;
+                }
 
-				if (this.canvas.sheetTab.IsVisible
-					|| this.canvas.horScrollbar.IsVisible)
-				{
-					h -= ScrollBarSize;
-				}
+                if (this.canvas.sheetTab.IsVisible
+                    || this.canvas.horScrollbar.IsVisible)
+                {
+                    h -= ScrollBarSize;
+                }
 
-				if (w < 0) w = 0;
-				if (h < 0) h = 0;
+                if (w < 0) w = 0;
+                if (h < 0) h = 0;
 
-				return new Rectangle(0, 0, w, h);
-			}
+                return new Rectangle(0, 0, w, h);
+            }
 
-			public void Focus()
-			{
-				this.canvas.Focus();
-			}
+            public void Focus()
+            {
+                this.canvas.Focus();
+            }
 
-			public void Invalidate()
-			{
-				this.canvas.InvalidateVisual();
-			}
+            public void Invalidate()
+            {
+                this.canvas.InvalidateVisual();
+            }
 
-			public void ChangeBackColor(Color color)
-			{
-				this.canvas.canvas.Background = new SolidColorBrush(color);
-			}
+            public void ChangeBackColor(Color color)
+            {
+                this.canvas.Background = new SolidColorBrush(color);
+            }
 
-			public bool IsVisible
-			{
-				get { return this.canvas.IsVisible; }
-			}
+            public bool IsVisible
+            {
+                get { return this.canvas.IsVisible; }
+            }
 
-			public Graphics.Point PointToScreen(Graphics.Point p)
-			{
-				var pixelPoint = this.canvas.PointToScreen(p);
+            public Graphics.Point PointToScreen(Graphics.Point p)
+            {
+                var pixelPoint = this.canvas.PointToScreen(p);
                 return new Point(pixelPoint.X, pixelPoint.Y);
             }
 
-			public IGraphics PlatformGraphics { get { return null; } }
+            public IGraphics PlatformGraphics { get { return null; } }
 
-			public void ChangeBackgroundColor(SolidColor color)
-			{
-				this.canvas.canvas.Background = new SolidColorBrush(color);
-			}
+            public void ChangeBackgroundColor(SolidColor color)
+            {
+            }
 
-			public void ShowTooltip(Graphics.Point point, string content)
-			{
-				// not implemented
-			}
+            public void ShowTooltip(Graphics.Point point, string content)
+            {
+                // not implemented
+            }
 
-			public ISheetTabControl SheetTabControl
-			{
-				get { return this.canvas.sheetTab; }
-			}
+            public ISheetTabControl SheetTabControl
+            {
+                get { return this.canvas.sheetTab; }
+            }
 
-			public double BaseScale { get { return 0f; } }
-			public double MinScale { get { return 0.1f; } }
-			public double MaxScale { get { return 4f; } }
+            public double BaseScale { get { return 0f; } }
+            public double MinScale { get { return 0.1f; } }
+            public double MaxScale { get { return 4f; } }
 
-			#endregion // IControlAdapter Members
+            #endregion // IControlAdapter Members
 
-			#region IEditableControlInterface Members
+            #region IEditableControlInterface Members
 
-			public void ShowEditControl(Graphics.Rectangle bounds, Cell cell)
-			{
-				var sheet = this.canvas.CurrentWorksheet;
+            public void ShowEditControl(Graphics.Rectangle bounds, Cell cell)
+            {
+                var sheet = this.canvas.CurrentWorksheet;
 
-				Color textColor;
+                Color textColor;
 
-				if (!cell.RenderColor.IsTransparent)
-				{
-					textColor = cell.RenderColor;
-				}
-				else if (cell.InnerStyle.HasStyle(PlainStyleFlag.TextColor))
-				{
-					// cell text color, specified by SetRangeStyle
-					textColor = cell.InnerStyle.TextColor;
-				}
-				else
-				{
-					// default cell text color
-					textColor = this.canvas.controlStyle[ControlAppearanceColors.GridText];
-				}
+                if (!cell.RenderColor.IsTransparent)
+                {
+                    textColor = cell.RenderColor;
+                }
+                else if (cell.InnerStyle.HasStyle(PlainStyleFlag.TextColor))
+                {
+                    // cell text color, specified by SetRangeStyle
+                    textColor = cell.InnerStyle.TextColor;
+                }
+                else
+                {
+                    // default cell text color
+                    textColor = this.canvas.controlStyle[ControlAppearanceColors.GridText];
+                }
 
-				Canvas.SetLeft(this.editTextbox, bounds.X);
-				Canvas.SetTop(this.editTextbox, bounds.Y);
+                Canvas.SetLeft(this.editTextbox, bounds.X);
+                Canvas.SetTop(this.editTextbox, bounds.Y);
 
-				this.editTextbox.Width = bounds.Width;
-				this.editTextbox.Height = bounds.Height;
-				//this.editTextbox.Bounds.Size = bounds.Size;
+                this.editTextbox.Width = bounds.Width;
+                this.editTextbox.Height = bounds.Height;
+                //this.editTextbox.Bounds.Size = bounds.Size;
 
-				this.editTextbox.CellSize = cell.Bounds.Size;
-				this.editTextbox.VAlign = cell.InnerStyle.VAlign;
-				this.editTextbox.FontFamily = new FontFamily(cell.InnerStyle.FontName);
-				this.editTextbox.FontSize = cell.InnerStyle.FontSize * sheet.ScaleFactor * 96f / 72f;
-				this.editTextbox.FontStyle = PlatformUtility.ToWPFFontStyle(cell.InnerStyle.fontStyles);
-				this.editTextbox.Foreground = this.Renderer.GetBrush(textColor);
-				this.editTextbox.Background = this.Renderer.GetBrush(cell.InnerStyle.HasStyle(PlainStyleFlag.BackColor)
-					? cell.InnerStyle.BackColor : this.canvas.controlStyle[ControlAppearanceColors.GridBackground]);
-				this.editTextbox.SelectionStart = this.editTextbox.Text.Length;
-				this.editTextbox.TextWrap = cell.InnerStyle.TextWrapMode != TextWrapMode.NoWrap;
-				this.editTextbox.TextWrapping = (cell.InnerStyle.TextWrapMode == TextWrapMode.NoWrap)
-					? TextWrapping.NoWrap : TextWrapping.Wrap;
+                this.editTextbox.CellSize = cell.Bounds.Size;
+                this.editTextbox.VAlign = cell.InnerStyle.VAlign;
+                this.editTextbox.FontFamily = new FontFamily(cell.InnerStyle.FontName);
+                this.editTextbox.FontSize = cell.InnerStyle.FontSize * sheet.ScaleFactor * 96f / 72f;
+                this.editTextbox.FontStyle = PlatformUtility.ToWPFFontStyle(cell.InnerStyle.fontStyles);
+                this.editTextbox.Foreground = this.Renderer.GetBrush(textColor);
+                this.editTextbox.Background = this.Renderer.GetBrush(cell.InnerStyle.HasStyle(PlainStyleFlag.BackColor)
+                    ? cell.InnerStyle.BackColor : this.canvas.controlStyle[ControlAppearanceColors.GridBackground]);
+                this.editTextbox.SelectionStart = this.editTextbox.Text.Length;
+                this.editTextbox.TextWrap = cell.InnerStyle.TextWrapMode != TextWrapMode.NoWrap;
+                this.editTextbox.TextWrapping = (cell.InnerStyle.TextWrapMode == TextWrapMode.NoWrap)
+                    ? TextWrapping.NoWrap : TextWrapping.Wrap;
 
-				this.editTextbox.IsVisible = true;
-				this.editTextbox.Focus();
-			}
+                this.editTextbox.IsVisible = true;
+                this.editTextbox.Focus();
+            }
 
-			public void HideEditControl()
-			{
-				this.editTextbox.IsVisible = false;
-			}
+            public void HideEditControl()
+            {
+                this.editTextbox.IsVisible = false;
+            }
 
-			public void SetEditControlText(string text)
-			{
-				this.editTextbox.Text = text;
-			}
+            public void SetEditControlText(string text)
+            {
+                this.editTextbox.Text = text;
+            }
 
-			public string GetEditControlText()
-			{
-				return this.editTextbox.Text;
-			}
+            public string GetEditControlText()
+            {
+                return this.editTextbox.Text;
+            }
 
-			public void EditControlSelectAll()
-			{
-				this.editTextbox.SelectAll();
-			}
+            public void EditControlSelectAll()
+            {
+                this.editTextbox.SelectAll();
+            }
 
-			public void SetEditControlCaretPos(int pos)
-			{
-				this.editTextbox.SelectionStart = pos;
-			}
+            public void SetEditControlCaretPos(int pos)
+            {
+                this.editTextbox.SelectionStart = pos;
+            }
 
-			public int GetEditControlCaretPos()
-			{
-				return this.editTextbox.SelectionStart;
-			}
+            public int GetEditControlCaretPos()
+            {
+                return this.editTextbox.SelectionStart;
+            }
 
-			public int GetEditControlCaretLine()
+            public int GetEditControlCaretLine()
             {
                 return this.editTextbox .CaretIndex;
                 //this.editTextbox.TextLayout.GetLineIndexFromCharacterIndex(this.editTextbox.SelectionStart,false);
             }
 
-			public void SetEditControlAlignment(ReoGridHorAlign align)
-			{
-				switch (align)
-				{
-					default:
-					case ReoGridHorAlign.Left:
-						this.editTextbox.HorizontalAlignment = HorizontalAlignment.Left;
-						break;
+            public void SetEditControlAlignment(ReoGridHorAlign align)
+            {
+                switch (align)
+                {
+                    default:
+                    case ReoGridHorAlign.Left:
+                        this.editTextbox.HorizontalAlignment = HorizontalAlignment.Left;
+                        break;
 
-					case ReoGridHorAlign.Center:
-					case ReoGridHorAlign.DistributedIndent:
-						this.editTextbox.HorizontalAlignment = HorizontalAlignment.Center;
-						break;
+                    case ReoGridHorAlign.Center:
+                    case ReoGridHorAlign.DistributedIndent:
+                        this.editTextbox.HorizontalAlignment = HorizontalAlignment.Center;
+                        break;
 
-					case ReoGridHorAlign.Right:
-						this.editTextbox.HorizontalAlignment = HorizontalAlignment.Right;
-						break;
-				}
-			}
+                    case ReoGridHorAlign.Right:
+                        this.editTextbox.HorizontalAlignment = HorizontalAlignment.Right;
+                        break;
+                }
+            }
 
-			public void EditControlApplySystemMouseDown()
-			{
-				//Point p = System.Windows.Input.Mouse.GetPosition(this.editTextbox);
+            public void EditControlApplySystemMouseDown()
+            {
+                //Point p = System.Windows.Input.Mouse.GetPosition(this.editTextbox);
 
-				//p.X += 2; // fix 2 pixels (borders of left and right)
-				//p.Y -= 1; // fix 1 pixels (top)
+                //p.X += 2; // fix 2 pixels (borders of left and right)
+                //p.Y -= 1; // fix 1 pixels (top)
 
                 int caret = this.editTextbox.CaretIndex; //this.editTextbox.TextLayout.GetCharacterIndexFromPoint(p, true);
 
-				if (caret >= 0 && caret <= this.editTextbox.Text.Length)
-				{
-					this.editTextbox.SelectionStart = caret;
-				}
+                if (caret >= 0 && caret <= this.editTextbox.Text.Length)
+                {
+                    this.editTextbox.SelectionStart = caret;
+                }
 
-				this.editTextbox.Focus();
-			}
+                this.editTextbox.Focus();
+            }
 
-			public void EditControlCopy()
-			{
-				this.editTextbox.Copy();
-			}
+            public void EditControlCopy()
+            {
+                this.editTextbox.Copy();
+            }
 
-			public void EditControlPaste()
-			{
-				this.editTextbox.Paste();
-			}
+            public void EditControlPaste()
+            {
+                this.editTextbox.Paste();
+            }
 
-			public void EditControlCut()
-			{
-				this.editTextbox.Cut();
-			}
+            public void EditControlCut()
+            {
+                this.editTextbox.Cut();
+            }
 
-			public void EditControlUndo()
-			{
-				this.editTextbox.Undo();
-			}
-			#endregion
+            public void EditControlUndo()
+            {
+                this.editTextbox.Undo();
+            }
+            #endregion
 
-			#region IScrollableControlInterface Members
+            #region IScrollableControlInterface Members
 
-			public bool ScrollBarHorizontalVisible
-			{
-				get { return this.canvas.horScrollbar.IsVisible; }
+            public bool ScrollBarHorizontalVisible
+            {
+                get { return this.canvas.horScrollbar.IsVisible; }
                 set { this.canvas.horScrollbar.IsVisible = value; }
             }
 
-			public bool ScrollBarVerticalVisible
-			{
-				get { return this.canvas.verScrollbar.IsVisible; }
-				set { this.canvas.verScrollbar.IsVisible = value; }
-			}
+            public bool ScrollBarVerticalVisible
+            {
+                get { return this.canvas.verScrollbar.IsVisible; }
+                set { this.canvas.verScrollbar.IsVisible = value; }
+            }
 
-			public double ScrollBarHorizontalMaximum
-			{
-				get { return this.canvas.horScrollbar.Maximum; }
-				set { this.canvas.horScrollbar.Maximum = value; }
-			}
+            public double ScrollBarHorizontalMaximum
+            {
+                get { return this.canvas.horScrollbar.Maximum; }
+                set { this.canvas.horScrollbar.Maximum = value; }
+            }
 
-			public double ScrollBarHorizontalMinimum
-			{
-				get { return this.canvas.horScrollbar.Minimum; }
-				set { this.canvas.horScrollbar.Minimum = value; }
-			}
+            public double ScrollBarHorizontalMinimum
+            {
+                get { return this.canvas.horScrollbar.Minimum; }
+                set { this.canvas.horScrollbar.Minimum = value; }
+            }
 
-			public double ScrollBarHorizontalValue
-			{
-				get { return this.canvas.horScrollbar.Value; }
-				set { this.canvas.horScrollbar.Value = value; }
-			}
+            public double ScrollBarHorizontalValue
+            {
+                get { return this.canvas.horScrollbar.Value; }
+                set { this.canvas.horScrollbar.Value = value; }
+            }
 
-			public double ScrollBarHorizontalLargeChange
-			{
-				get { return this.canvas.horScrollbar.LargeChange; }
-				set
-				{
-					this.canvas.horScrollbar.LargeChange = value;
-					this.canvas.horScrollbar.ViewportSize = value;
-				}
-			}
+            public double ScrollBarHorizontalLargeChange
+            {
+                get { return this.canvas.horScrollbar.LargeChange; }
+                set
+                {
+                    this.canvas.horScrollbar.LargeChange = value;
+                    this.canvas.horScrollbar.ViewportSize = value;
+                }
+            }
 
-			public double ScrollBarVerticalMaximum
-			{
-				get { return this.canvas.verScrollbar.Maximum; }
-				set { this.canvas.verScrollbar.Maximum = value; }
-			}
+            public double ScrollBarVerticalMaximum
+            {
+                get { return this.canvas.verScrollbar.Maximum; }
+                set { this.canvas.verScrollbar.Maximum = value; }
+            }
 
-			public double ScrollBarVerticalMinimum
-			{
-				get { return this.canvas.verScrollbar.Minimum; }
-				set { this.canvas.verScrollbar.Minimum = value; }
-			}
+            public double ScrollBarVerticalMinimum
+            {
+                get { return this.canvas.verScrollbar.Minimum; }
+                set { this.canvas.verScrollbar.Minimum = value; }
+            }
 
-			public double ScrollBarVerticalValue
-			{
-				get { return this.canvas.verScrollbar.Value; }
-				set { this.canvas.verScrollbar.Value = value; }
-			}
+            public double ScrollBarVerticalValue
+            {
+                get { return this.canvas.verScrollbar.Value; }
+                set { this.canvas.verScrollbar.Value = value; }
+            }
 
-			public double ScrollBarVerticalLargeChange
-			{
-				get { return this.canvas.verScrollbar.LargeChange; }
-				set
-				{
-					this.canvas.verScrollbar.LargeChange = value;
-					this.canvas.verScrollbar.ViewportSize = value;
-				}
-			}
+            public double ScrollBarVerticalLargeChange
+            {
+                get { return this.canvas.verScrollbar.LargeChange; }
+                set
+                {
+                    this.canvas.verScrollbar.LargeChange = value;
+                    this.canvas.verScrollbar.ViewportSize = value;
+                }
+            }
 
-			#endregion
+            #endregion
 
-			#region ITimerSupportedControlInterface Members
+            #region ITimerSupportedControlInterface Members
 
-			public void StartTimer()
-			{
-				throw new NotImplementedException();
-			}
+            public void StartTimer()
+            {
+                throw new NotImplementedException();
+            }
 
-			public void StopTimer()
-			{
-				throw new NotImplementedException();
-			}
+            public void StopTimer()
+            {
+                throw new NotImplementedException();
+            }
 
-			#endregion
-		}
-		#endregion // Adapter
+            #endregion
+        }
+        #endregion // Adapter
 
-		#region Editor - TextBox
-		private class InputTextBox : TextBox
-		{
-			internal ReoGridControl Owner { get; set; }
-			internal bool TextWrap { get; set; }
-			internal Avalonia.Size CellSize { get; set; }
-			internal ReoGridVerAlign VAlign { get; set; }
+        #region Editor - TextBox
+        private class InputTextBox : TextBox
+        {
+            internal ReoGridControl Owner { get; set; }
+            internal bool TextWrap { get; set; }
+            internal Avalonia.Size CellSize { get; set; }
+            internal ReoGridVerAlign VAlign { get; set; }
 
-			internal InputTextBox()
-				: base()
-			{
+            static InputTextBox()
+            {
+                TextProperty.Changed.Subscribe(OnTextChanged);
+
+            }
+            internal InputTextBox()
+                : base()
+            {
                 //SetStyle(ControlStyles.SupportsTransparentBackColor, true);
                 AddHandler(InputElement.KeyDownEvent, OnPreviewKeyDown);
-                TextProperty.Changed.Subscribe(OnTextChanged);
                 AddHandler(TextInputEvent, OnPreviewTextInput);
 
             }
 
-			protected override void OnLostFocus(RoutedEventArgs e)
-			{
-				var sheet = this.Owner.CurrentWorksheet;
+            protected override void OnLostFocus(RoutedEventArgs e)
+            {
+                var sheet = this.Owner.CurrentWorksheet;
 
-				if (sheet.currentEditingCell != null && IsVisible)
-				{
-					sheet.EndEdit(Text);
-					IsVisible = false;
-				}
-				base.OnLostFocus(e);
-			}
+                if (sheet.currentEditingCell != null && IsVisible)
+                {
+                    sheet.EndEdit(Text);
+                    IsVisible = false;
+                }
+                base.OnLostFocus(e);
+            }
 
-			private void OnPreviewKeyDown(object sender, KeyEventArgs e)
-			{
-				var sheet = this.Owner.CurrentWorksheet;
+            private void OnPreviewKeyDown(object sender, KeyEventArgs e)
+            {
+                var sheet = this.Owner.CurrentWorksheet;
 
-				// in single line text
-				if (!TextWrap && Text.IndexOf('\n') == -1)
-				{
-					Action moveAction = null;
+                // in single line text
+                if (!TextWrap && Text.IndexOf('\n') == -1)
+                {
+                    Action moveAction = null;
 
-					if (e.Key == Key.Up)
-					{
-						moveAction = () => sheet.MoveSelectionUp();
-					}
-					else if (e.Key == Key.Down)
-					{
-						moveAction = () => sheet.MoveSelectionDown();
-					}
-					else if (e.Key == Key.Left && SelectionStart == 0)
-					{
-						moveAction = () => sheet.MoveSelectionLeft();
-					}
-					else if (e.Key == Key.Right && SelectionStart == Text.Length)
-					{
-						moveAction = () => sheet.MoveSelectionRight();
-					}
-					if (moveAction != null)
-					{
-						sheet.EndEdit(Text);
-						moveAction();
-						e.Handled = true;
-					}
-				}
-			}
+                    if (e.Key == Key.Up)
+                    {
+                        moveAction = () => sheet.MoveSelectionUp();
+                    }
+                    else if (e.Key == Key.Down)
+                    {
+                        moveAction = () => sheet.MoveSelectionDown();
+                    }
+                    else if (e.Key == Key.Left && SelectionStart == 0)
+                    {
+                        moveAction = () => sheet.MoveSelectionLeft();
+                    }
+                    else if (e.Key == Key.Right && SelectionStart == Text.Length)
+                    {
+                        moveAction = () => sheet.MoveSelectionRight();
+                    }
+                    if (moveAction != null)
+                    {
+                        sheet.EndEdit(Text);
+                        moveAction();
+                        e.Handled = true;
+                    }
+                }
+            }
 
-			protected override void OnKeyDown(KeyEventArgs e)
-			{
-				var sheet = this.Owner.CurrentWorksheet;
+            protected override void OnKeyDown(KeyEventArgs e)
+            {
+                var sheet = this.Owner.CurrentWorksheet;
 
-				if (sheet.currentEditingCell != null && IsVisible)
-				{
-					if ( e.KeyModifiers == KeyModifiers.Control
-						&& e.Key == Key.Enter)
-					{
-						var str = this.Text;
-						var selstart = this.SelectionStart;
-						str = str.Insert(this.SelectionStart, Environment.NewLine);
-						this.Text = str;
-						this.SelectionStart = selstart + Environment.NewLine.Length;
-					}
-					else if (e.KeyModifiers == KeyModifiers.None && e.Key == Key.Enter)
-					{
-						sheet.EndEdit(this.Text);
-						sheet.MoveSelectionForward();
-						e.Handled = true;
-					}
-					else if (e.Key == Key.Enter)
-					{
-						// TODO: auto adjust row height
-					}
-					// shift + tab
-					else if (e.KeyModifiers == KeyModifiers.Meta && e.Key == Key.Tab)
-					{
-						sheet.EndEdit(this.Text);
-						sheet.MoveSelectionBackward();
-						e.Handled = true;
-					}
-					// tab
-					else if (e.Key == Key.Tab)
-					{
-						sheet.EndEdit(this.Text);
-						sheet.MoveSelectionForward();
-						e.Handled = true;
-					}
-					else if (e.Key == Key.Escape)
-					{
-						sheet.EndEdit(EndEditReason.Cancel);
-						e.Handled = true;
-					}
-				}
-			}
-			//protected override void OnLostKeyboardFocus(KeyboardFocusChangedEventArgs e)
-			//{
-			//	base.OnLostKeyboardFocus(e);
-			//	this.Owner.CurrentWorksheet.EndEdit(Text, EndEditReason.NormalFinish);
-			//}
-			private static  void OnTextChanged(AvaloniaPropertyChangedEventArgs e)
+                if (sheet.currentEditingCell != null && IsVisible)
+                {
+                    if ( e.KeyModifiers == KeyModifiers.Control
+                        && e.Key == Key.Enter)
+                    {
+                        var str = this.Text;
+                        var selstart = this.SelectionStart;
+                        str = str.Insert(this.SelectionStart, Environment.NewLine);
+                        this.Text = str;
+                        this.SelectionStart = selstart + Environment.NewLine.Length;
+                    }
+                    else if (e.KeyModifiers == KeyModifiers.None && e.Key == Key.Enter)
+                    {
+                        sheet.EndEdit(this.Text);
+                        sheet.MoveSelectionForward();
+                        e.Handled = true;
+                    }
+                    else if (e.Key == Key.Enter)
+                    {
+                        // TODO: auto adjust row height
+                    }
+                    // shift + tab
+                    else if (e.KeyModifiers == KeyModifiers.Meta && e.Key == Key.Tab)
+                    {
+                        sheet.EndEdit(this.Text);
+                        sheet.MoveSelectionBackward();
+                        e.Handled = true;
+                    }
+                    // tab
+                    else if (e.Key == Key.Tab)
+                    {
+                        sheet.EndEdit(this.Text);
+                        sheet.MoveSelectionForward();
+                        e.Handled = true;
+                    }
+                    else if (e.Key == Key.Escape)
+                    {
+                        sheet.EndEdit(EndEditReason.Cancel);
+                        e.Handled = true;
+                    }
+                }
+            }
+            //protected override void OnLostKeyboardFocus(KeyboardFocusChangedEventArgs e)
+            //{
+            //	base.OnLostKeyboardFocus(e);
+            //	this.Owner.CurrentWorksheet.EndEdit(Text, EndEditReason.NormalFinish);
+            //}
+            private  static void OnTextChanged(AvaloniaPropertyChangedEventArgs e)
             {
                 var @this = e.Sender as InputTextBox;
-				@this.Text = @this.Owner.currentWorksheet.RaiseCellEditTextChanging(@this.Text);
-			}
-			private void OnPreviewTextInput(object sender, TextInputEventArgs e)
-			{
-				if (e.Text.Length > 0)
-				{
-					int inputChar = e.Text[0];
-					if (inputChar != this.Owner.currentWorksheet.RaiseCellEditCharInputed(inputChar))
-					{
+                if (@this != null)
+                {
+                    @this.Text = @this.Owner.currentWorksheet.RaiseCellEditTextChanging(@this.Text);
+                }
+            }
 
-						e.Handled = true;
-					}
+            protected virtual void OnTextChanged(string? oldValue, string? newValue)
+            {
+            }
 
-				}
-			}
-		}
+            private void OnPreviewTextInput(object sender, TextInputEventArgs e)
+            {
+                if (e.Text.Length > 0)
+                {
+                    int inputChar = e.Text[0];
+                    if (inputChar != this.Owner.currentWorksheet.RaiseCellEditCharInputed(inputChar))
+                    {
 
-		#endregion // Editor - TextBox
+                        e.Handled = true;
+                    }
 
-		#region Context Menu Strips
-		internal ContextMenu BaseContextMenu { get { return base.ContextMenu; } set { base.ContextMenu = value; } }
+                }
+            }
+        }
 
-		/// <summary>
-		/// Get or set the cells context menu
-		/// </summary>
-		public ContextMenu CellsContextMenu { get; set; }
+        #endregion // Editor - TextBox
 
-		/// <summary>
-		/// Get or set the row header context menu
-		/// </summary>
-		public ContextMenu RowHeaderContextMenu { get; set; }
+        #region Context Menu Strips
+        internal ContextMenu BaseContextMenu { get { return base.ContextMenu; } set { base.ContextMenu = value; } }
 
-		/// <summary>
-		/// Get or set the column header context menu
-		/// </summary>
-		public ContextMenu ColumnHeaderContextMenu { get; set; }
+        /// <summary>
+        /// Get or set the cells context menu
+        /// </summary>
+        public ContextMenu CellsContextMenu { get; set; }
 
-		/// <summary>
-		/// Get or set the lead header context menu
-		/// </summary>
-		public ContextMenu LeadHeaderContextMenu { get; set; }
-		#endregion // Context Menu Strips
+        /// <summary>
+        /// Get or set the row header context menu
+        /// </summary>
+        public ContextMenu RowHeaderContextMenu { get; set; }
 
-		/// <summary>
-		/// Get or set filepath of startup template file
-		/// </summary>
-		public string LoadFromFile { get; set; }
+        /// <summary>
+        /// Get or set the column header context menu
+        /// </summary>
+        public ContextMenu ColumnHeaderContextMenu { get; set; }
 
-		public void Dispose() { }
-	}
+        /// <summary>
+        /// Get or set the lead header context menu
+        /// </summary>
+        public ContextMenu LeadHeaderContextMenu { get; set; }
+        #endregion // Context Menu Strips
 
-	#region WPFUtility
-	internal class WPFUtility
-	{
-		public static MouseButtons ConvertToUIMouseButtons(MouseButton e)
-		{
-			MouseButtons btn = MouseButtons.None;
+        /// <summary>
+        /// Get or set filepath of startup template file
+        /// </summary>
+        public string LoadFromFile { get; set; }
+
+        public void Dispose() { }
+    }
+
+    #region WPFUtility
+    internal class WPFUtility
+    {
+        public static MouseButtons ConvertToUIMouseButtons(MouseButton e)
+        {
+            MouseButtons btn = MouseButtons.None;
             switch (e)
             {
                 case MouseButton.None:
@@ -1130,7 +1166,7 @@ namespace unvell.ReoGrid
                     throw new ArgumentOutOfRangeException();
             }
             return btn;
-		}
+        }
 
         public static MouseButtons ConvertToUIMouseButtons(PointerPressedEventArgs e)
         {
@@ -1162,7 +1198,7 @@ namespace unvell.ReoGrid
         }
 
     }
-	#endregion
+    #endregion
 
 }
 

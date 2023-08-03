@@ -96,9 +96,9 @@ namespace unvell.ReoGrid.Drawing.Shapes.SmartShapes
 			{
 				Avalonia.Media.PathFigure pf = new Avalonia.Media.PathFigure();
 			
-				pf.Segments.Add(new Avalonia.Media.LineSegment(this.OriginPoint, false));
-				pf.Segments.Add(new Avalonia.Media.ArcSegment(new Avalonia.Point(0, 0),
-					new Avalonia.Size(this.Width, this.Height), this.SweepAngle, true, Avalonia.Media.SweepDirection.Clockwise, false));
+				pf.Segments.Add(new Avalonia.Media.LineSegment{Point = this.OriginPoint});
+				pf.Segments.Add(new Avalonia.Media.ArcSegment{Point = new Avalonia.Point(0, 0),
+					Size = new Avalonia.Size(this.Width, this.Height),RotationAngle = this.SweepAngle,IsLargeArc = true,SweepDirection = Avalonia.Media.SweepDirection.Clockwise});
 
 				Path.Figures.Add(pf);
 			}

@@ -94,9 +94,9 @@ namespace unvell.ReoGrid.DataFormat
 				//	cell.DataFormatArgs = new NumberDataFormatter.NumberFormatArgs { DecimalPlaces = digits };
 				//}
 
-				//string decimalPlacePart = new string('0', digits);
+				string decimalPlacePart = new string('0', digits);
 
-				//formattedText = (percent * 100).ToString("0." + decimalPlacePart) + "%";
+				formattedText = (percent * 100).ToString("0." + decimalPlacePart) + "%";
 
 				//if (cell.InnerStyle.HAlign == ReoGridHorAlign.General)
 				//{

@@ -1997,7 +1997,7 @@ namespace unvell.ReoGrid
 		#endregion // Internal Utilites
 
 		#region Pick Range & Style Brush
-#if WINFORM || WPF
+#if WINFORM || WPF || AVALONIA
 		internal Func<Worksheet, RangePosition, bool> whenRangePicked;
 
 		internal void PickRange(Func<Worksheet, RangePosition, bool> onPicked)
@@ -2050,8 +2050,9 @@ namespace unvell.ReoGrid
 						DoAction(actionGroup);
 					}
 
-					return !Toolkit.IsKeyDown(Win32.VKey.VK_CONTROL);
-				});
+				//	return !Toolkit.IsKeyDown(Win32.VKey.VK_CONTROL);
+                    return true;
+                });
 			}
 		}
 #endif // WINFORM || WPF

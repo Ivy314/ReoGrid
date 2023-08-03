@@ -27,6 +27,7 @@ using System.Drawing;
 using System.Globalization;
 
 using unvell.Common;
+using unvell.ReoGrid.Drawing.Text;
 using unvell.ReoGrid.Graphics;
 using unvell.ReoGrid.Interaction;
 using FontFamily = Avalonia.Media.FontFamily;
@@ -49,8 +50,9 @@ namespace unvell.ReoGrid.Rendering
 	{
 		internal static bool IsKeyDown(KeyCode key)
 		{
-			return Toolkit.IsKeyDown((Common.Win32Lib.Win32.VKey)key);
-		}
+		//	return Toolkit.IsKeyDown((Common.Win32Lib.Win32.VKey)key);
+        return false;
+        }
 
 		private static double lastGetDPI = 0;
 
@@ -117,7 +119,7 @@ namespace unvell.ReoGrid.Rendering
 		//	return (null, null);
 		//}
 
-        private static ResourcePoolManager resourcePoolManager;// = new ResourcePoolManager();
+        private static ResourcePoolManager resourcePoolManager = new ResourcePoolManager();
 
 		internal static Graphics.Size MeasureText(IRenderer r, string text, string fontName, double fontSize, Drawing.Text.FontStyles style)
 		{
@@ -142,12 +144,12 @@ namespace unvell.ReoGrid.Rendering
 				return Graphics.Size.Zero;
 			}
 
-			//var typeface = new System.Windows.Media.Typeface(
-			//			new System.Windows.Media.FontFamily(fontName),
-			//			PlatformUtility.ToWPFFontStyle(this.fontStyles),
-			//			(this.fontStyles & FontStyles.Bold) == FontStyles.Bold ?
-			//			System.Windows.FontWeights.Bold : System.Windows.FontWeights.Normal,
-			//			System.Windows.FontStretches.Normal);
+			typeface = new Avalonia.Media.Typeface(
+						new Avalonia.Media.FontFamily(fontName),
+						PlatformUtility.ToWPFFontStyle(style),
+						(style & FontStyles.Bold) == FontStyles.Bold ?
+						FontWeight.Bold : FontWeight.Normal,
+						FontStretch.Normal);
 
 			IGlyphTypeface glyphTypeface;
 
@@ -164,10 +166,10 @@ namespace unvell.ReoGrid.Rendering
 
 				for (int n = 0; n < text.Length; n++)
 				{
-					ushort glyphIndex = glyphTypeface.CharacterToGlyphMap[text[n]];
+					ushort glyphIndex = glyphTypeface.GetGlyph(text[n]);
 					//GlyphIndexes.Add(glyphIndex);
 
-					double width = glyphTypeface.AdvanceWidths[glyphIndex] * size;
+					double width = glyphTypeface.GetGlyphAdvance(glyphIndex) * size;
 					//this.TextSizes.Add(width);
 
 					totalWidth += width;

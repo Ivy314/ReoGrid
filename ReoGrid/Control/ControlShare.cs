@@ -1208,13 +1208,13 @@ namespace unvell.ReoGrid
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public Cursor EntireSheetSelectionCursor { get; set; }
 
-        private static Cursor LoadCursorFromResource(byte[] res)
-        {
-            using (var ms = new MemoryStream(res))
-            {
-                return new Cursor(ms);
-            }
-        }
+        //private static Cursor LoadCursorFromResource(byte[] res)
+        //{
+        //    using (var ms = new MemoryStream(res))
+        //    {
+        //        return new Cursor(ms);
+        //    }
+        //}
 #endif // WINFORM || WPF
         #endregion Cursors
 

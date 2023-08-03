@@ -39,6 +39,9 @@ using unvell.ReoGrid.Outline;
 using unvell.ReoGrid.Utility;
 using unvell.ReoGrid.Graphics;
 using unvell.ReoGrid.Main;
+using Avalonia.Media.Imaging;
+using Avalonia;
+using System.Drawing;
 
 namespace unvell.ReoGrid
 {
@@ -1408,11 +1411,24 @@ namespace unvell.ReoGrid
 												 }
 												 catch (NotSupportedException) { }
 												 enc.Save(ms);
-#else // WINFORM
+#elif WINFORM
 									imageBody.Image.ImageSource.Save(ms, System.Drawing.Imaging.ImageFormat.Png);
+#elif AVALONIA
+                                    var img = ((CellTypes.ImageCell)cell.body).Image;
+                                    var pixelSize = new PixelSize((int)img.Rect.Width, (int)img.Rect.Height);
+                                    var dpiVector = new Vector(96, 96);
+                                    using (var renderBitmap = new RenderTargetBitmap(pixelSize, dpiVector))
+                                    {
+                                        using (DrawingContext ctx = renderBitmap.CreateDrawingContext())
+                                        {
+											img.Draw(ctx);
+                                        }
+                                        renderBitmap.Save(ms);
+
+                                    }
 
 #endif // WINFORM | WPF
-									xmlCell.data = "image/png," + Convert.ToBase64String(ms.ToArray());
+                                    xmlCell.data = "image/png," + Convert.ToBase64String(ms.ToArray());
 								}
 							}
 							else if (RGFPersistenceProvider.CustomBodyTypeIdentifiers.TryGetValue(cell.body.GetType(), out var typeIdentifier))
