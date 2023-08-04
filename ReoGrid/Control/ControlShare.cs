@@ -123,6 +123,7 @@ namespace unvell.ReoGrid
 #endif // WINFORM || WPF
 
             this.ControlStyle = ControlAppearanceStyle.CreateDefaultControlStyle();
+            this.WorksheetScrolled += (s, e) => { this.ScrollCurrentWorksheet(e.X, e.Y); };
         }
 
         private void InitWorkbook(IControlAdapter adapter)
@@ -204,6 +205,8 @@ namespace unvell.ReoGrid
             };
 
             this.workbook.ExceptionHappened += Workbook_ErrorHappened;
+
+         
 
             #endregion // Workbook Event Attach
 
@@ -1355,7 +1358,7 @@ namespace unvell.ReoGrid
         }
         #endregion // Mouse
 
-#if WINFORM || WPF 
+#if WINFORM || WPF  || AVALONIA
 #if WINFORM
         /// <summary>
         /// Overrides mouse-leave event
@@ -1367,10 +1370,9 @@ namespace unvell.ReoGrid
         protected override void OnMouseLeave(System.Windows.Input.MouseEventArgs e)
         {
 #elif AVALONIA
-        protected override void OnMouseLeave(Avalonia.Input.MouseEventArgs e)
+        protected void OnMouseLeave()
         {
 #endif // WPF
-            base.OnMouseLeave(e);
 
             if (this.currentWorksheet != null)
             {

@@ -268,14 +268,11 @@ namespace unvell.ReoGrid.WPFDemo
             worksheet.MergeRange(2, 6, 5, 2);
 
             var image = new ImageDrawing();
-            //image.BeginInit();
 
-            //using (MemoryStream memory = new MemoryStream(Properties.Resources.computer_laptop_png))
-            //{
-            //	image.StreamSource = memory;
-            //	image.CacheOption = Avalonia.Media.Imaging.BitmapCacheOption.OnLoad;
-            //	image.EndInit();
-            //}
+            using (MemoryStream memory = new MemoryStream(Properties.Resources.computer_laptop_png))
+            {
+                image.ImageSource = new Bitmap(memory);
+            }
 
             worksheet[2, 6] = new ImageCell(image);
 

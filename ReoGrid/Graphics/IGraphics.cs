@@ -64,7 +64,6 @@ using RGBrush = Avalonia.Media.Brush;
 
 using PlatformGraphics = Avalonia.Media.DrawingContext;
 using RGTransform = Avalonia.Matrix;
-using WPFDrawingContext = Avalonia.Media.DrawingContext;
 
 #elif iOS
 using RGFloat = System.Double;

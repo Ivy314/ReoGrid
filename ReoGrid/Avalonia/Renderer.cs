@@ -370,7 +370,7 @@ namespace unvell.ReoGrid.Rendering
         {
             var mt = new MatrixTransform(m);
             this.transformStack.Push(mt);
-            statesStack.Push(this.g.PushTransform(m));
+            //statesStack.Push(this.g.PushTransform(mt.Matrix));
         }
 
         Matrix IGraphics.PopTransform()
@@ -393,7 +393,8 @@ namespace unvell.ReoGrid.Rendering
                 var mt = transformStack.Peek();
                 var m2 = Matrix.CreateTranslation(x,y);
                 //m2.Translate(x, y);
-                mt.Matrix = m2 * mt.Matrix;
+                mt.Matrix = mt.Matrix * m2;
+               statesStack.Push(this.g.PushTransform(mt.Matrix));
             }
         }
 
@@ -406,7 +407,8 @@ namespace unvell.ReoGrid.Rendering
                 var mt = transformStack.Peek();
                 var m2 = Matrix.CreateScale(x,y);
                 //m2.Scale(x, y);
-                mt.Matrix = m2 * mt.Matrix;
+                mt.Matrix = mt.Matrix * m2;
+               statesStack.Push(this.g.PushTransform(mt.Matrix));
             }
         }
 
@@ -418,7 +420,8 @@ namespace unvell.ReoGrid.Rendering
                 var m = mt.Matrix;
                 var m2 = Matrix.CreateRotation(angle);
                 //m2.RotateAt(angle, m.OffsetX, m.OffsetY);
-                mt.Matrix = m2 * mt.Matrix;
+                mt.Matrix = mt.Matrix * m2;
+                statesStack.Push(this.g.PushTransform(mt.Matrix));
             }
         }
 
@@ -428,6 +431,7 @@ namespace unvell.ReoGrid.Rendering
             {
                 var mt = transformStack.Peek();
                 mt.Matrix = Matrix.Identity;
+                statesStack.Push(this.g.PushTransform(mt.Matrix));
             }
         }
         #endregion // Transform
