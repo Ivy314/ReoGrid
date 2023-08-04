@@ -23,10 +23,7 @@ using RGFloat = System.Single;
 using RGFloat = System.Double;
 #endif
 
-using unvell.Common;
-
 using unvell.ReoGrid.Actions;
-using unvell.ReoGrid.Events;
 using unvell.ReoGrid.Graphics;
 using unvell.ReoGrid.Rendering;
 using unvell.ReoGrid.Interaction;
@@ -35,7 +32,7 @@ using unvell.ReoGrid.Main;
 namespace unvell.ReoGrid.Views
 {
 
-	class RowHeaderView : HeaderView
+    class RowHeaderView : HeaderView
 	{
 		public RowHeaderView(IViewportController vc)
 			: base(vc)

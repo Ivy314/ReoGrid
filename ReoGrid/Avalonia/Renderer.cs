@@ -134,24 +134,24 @@ namespace unvell.ReoGrid.Rendering
             }
         }
 
-        //public void DrawLine(SolidColor color, Point startPoint, Point endPoint, double width, LineStyles style, LineCapStyles startCap, LineCapStyles endCap)
-        //{
-        //	var b = this.resourceManager.GetBrush(color);
+        public void DrawLine(SolidColor color, Point startPoint, Point endPoint, double width, LineStyles style, LineCapStyles startCap, LineCapStyles endCap)
+        {
+            var b = this.resourceManager.GetBrush(color);
 
-        //	var p = new Pen(b, width);
+            var p = new Pen(b, width);
 
-        //	if (startCap == LineCapStyles.Arrow)
-        //	{
-        //		p.StartLineCap = PenLineCap.Triangle;
-        //	}
+            //if (startCap == LineCapStyles.Arrow)
+            //{
+            //    p.StartLineCap = PenLineCap.Triangle;
+            //}
 
-        //	if (endCap == LineCapStyles.Arrow)
-        //	{
-        //		p.EndLineCap = PenLineCap.Triangle;
-        //	}
+            //if (endCap == LineCapStyles.Arrow)
+            //{
+            //    p.EndLineCap = PenLineCap.Triangle;
+            //}
 
-        //	this.g.DrawLine(p, startPoint, endPoint);
-        //}
+            this.g.DrawLine(p, startPoint, endPoint);
+        }
         #endregion // Line
 
         #region Rectangle
@@ -250,7 +250,10 @@ namespace unvell.ReoGrid.Rendering
 
         public void DrawImage(ImageDrawing image, double x, double y, double width, double height)
         {
-            g.DrawImage(image.ImageSource, new Rect(x, y, width, height));
+            if (image.ImageSource != null)
+            {
+                g.DrawImage(image.ImageSource, new Rect(x, y, width, height));
+            }
         }
 
         public void DrawImage(ImageDrawing image, Rectangle bounds)
@@ -340,20 +343,23 @@ namespace unvell.ReoGrid.Rendering
         #endregion // Text
 
         #region Clip
+        private Stack<WPFDrawingContext.PushedState> clipsStack = new Stack<WPFDrawingContext.PushedState>();
         public void PushClip(Rectangle clipRect)
         {
-            this.g.PushClip((Rect)clipRect);
+            clipsStack.Push(g.PushClip((Rect)clipRect));
         }
 
         public void PopClip()
         {
             //this.g.Pop();
+            clipsStack.Pop().Dispose();
         }
         #endregion // Clip
 
         #region Transform
 
         private Stack<MatrixTransform> transformStack = new Stack<MatrixTransform>();
+        private Stack<WPFDrawingContext.PushedState> statesStack = new Stack<WPFDrawingContext.PushedState>();
 
         public void PushTransform()
         {
@@ -364,12 +370,13 @@ namespace unvell.ReoGrid.Rendering
         {
             var mt = new MatrixTransform(m);
             this.transformStack.Push(mt);
-            this.g.PushTransform(m);
+            statesStack.Push(this.g.PushTransform(m));
         }
 
         Matrix IGraphics.PopTransform()
         {
             //this.g.Pop();
+            statesStack.Pop().Dispose();
             return this.transformStack.Pop().Matrix;
         }
 

@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:rg="clr-namespace:unvell.ReoGrid;assembly=unvell.ReoGrid"
                 x:Class="unvell.ReoGrid.WPFDemo.MainWindow"
-        Title="ReoGrid WPF Demo" Height="640" Width="800">
+        Title="ReoGrid Avalonia Demo" Height="640" Width="800">
 
     <DockPanel>
         <Menu DockPanel.Dock="Top">

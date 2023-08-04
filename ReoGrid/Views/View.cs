@@ -18,7 +18,6 @@
 #define VP_DEBUG
 
 using System.Collections.Generic;
-using System.Diagnostics;
 
 #if WINFORM || ANDROID
 using RGFloat = System.Single;
@@ -26,7 +25,6 @@ using RGIntDouble = System.Int32;
 
 #elif WPF || AVALONIA
 using RGFloat = System.Double;
-using RGIntDouble = System.Double;
 
 #elif iOS
 using RGFloat = System.Double;
@@ -37,11 +35,10 @@ using RGIntDouble = System.Double;
 using unvell.ReoGrid.Graphics;
 using unvell.ReoGrid.Rendering;
 using unvell.ReoGrid.Interaction;
-using unvell.ReoGrid.Main;
 
 namespace unvell.ReoGrid.Views
 {
-	internal class View : IView
+    internal class View : IView
 	{
 		private IViewportController viewportController;
 

@@ -283,7 +283,7 @@ namespace unvell.ReoGrid.WPF
         {
             this.Clip = new RectangleGeometry(new Rect(0, 0, e.NewSize.Width, e.NewSize.Height));
 
-            this.canvas.Height = this.Height - 2;
+            this.canvas.Height = this.Bounds.Height - 2;
         }
 
 

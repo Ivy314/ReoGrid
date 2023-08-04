@@ -184,7 +184,7 @@ namespace unvell.ReoGrid.CellTypes
 			ControlPaint.DrawRadioButton(dc.Graphics.PlatformGraphics,
 				(System.Drawing.Rectangle)this.ContentBounds, state);
 
-#elif WPF
+#elif WPF || AVALONIA
 			var g = dc.Graphics;
 
 			var ox = this.ContentBounds.OriginX;

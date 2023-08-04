@@ -21,12 +21,17 @@
  * 
  ****************************************************************************/
 
+#define LOG_TO_FILE
+#define DEBUG1
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.IO;
 using System.Reflection;
+using Avalonia;
+
 
 namespace unvell.Common
 {
@@ -186,7 +191,7 @@ namespace unvell.Common
 		public DebugFileLogger()
 		{
 			string path = Path.Combine(
-			Path.GetDirectoryName(Application.ExecutablePath),
+			Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location),
 			"debug.log");
 			try
 			{
